@@ -108,8 +108,8 @@ library(futile.logger)
 if (file.exists('cache.RData')) {
   load('cache.RData')
 } else {
-  brca <- TCGA2STAT::getTCGA(disease = "BRCA", data.type = "RNASeq2", type = "RPKM", clinical = TRUE)
-  save(brca, file = 'cache.RData')
+  tcga.data <- TCGA2STAT::getTCGA(disease = "BRCA", data.type = "RNASeq2", type = "RPKM", clinical = TRUE)
+  save(tcga.data, file = 'cache.RData')
 }
 ```
 
@@ -122,17 +122,17 @@ Pattern to retrieve TCGA patient and sample type from extended barcode.
 # $2 gets the sample type
 tcga.barcode.pattern <- '(TCGA-[A-Z0-9a-z]{2}-[a-zA-Z0-9]{4})-([0-9]{2}).+'
 #
-# patient barcode for each column in brca$dat
+# patient barcode for each column in tcga.data$dat
 tissue.barcode <- list()
-tissue.barcode$all <- gsub(tcga.barcode.pattern, '\\1', colnames(brca$dat))
+tissue.barcode$all <- gsub(tcga.barcode.pattern, '\\1', colnames(tcga.data$dat))
 #
 # getting all tisues
 tissue <- list()
-tissue$all <- brca$dat
+tissue$all <- tcga.data$dat
 #
 # clinical data
 clinical <- list()
-clinical$all <- brca$clinical
+clinical$all <- tcga.data$clinical
 #
 #
 getParticipant <- function(fullBarcode) {
@@ -150,7 +150,7 @@ See [Code Tables Report](https://gdc.cancer.gov/resources-tcga-users/tcga-code-t
 
 ```{r tissue_mapping}
 # sample type per sample
-tissue.type  <- as.numeric(gsub(tcga.barcode.pattern,'\\2', colnames(brca$dat)))
+tissue.type  <- as.numeric(gsub(tcga.barcode.pattern,'\\2', colnames(tcga.data$dat)))
 #
 # mapping for tissue type
 tissue.mapping <- list( 
