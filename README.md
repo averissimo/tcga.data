@@ -277,20 +277,20 @@ for (el in names(tissue.mapping)) {
 ``` r
 sample.size <- c()
 for (el in names(tissue)) {
-  sample.size <- rbind(sample.size, ncol(tissue[[el]]))
+  sample.size <- rbind(sample.size, c(ncol(tissue[[el]]), nrow(tissue[[el]])))
 }
 rownames(sample.size) <- names(tissue)
-colnames(sample.size) <- '# of Samples'
+colnames(sample.size) <- c('# of Samples', '# of Genes')
 futile.logger::flog.info('Tissue information per tissue type:', sample.size, capture = TRUE)
 ```
 
-    ## INFO [2016-11-21 19:37:59] Tissue information per tissue type:
+    ## INFO [2016-11-21 19:42:24] Tissue information per tissue type:
     ## 
-    ##                     # of Samples
-    ## all                         1212
-    ## primary.solid.tumor         1093
-    ## metastatic                     7
-    ## solid.tissue.normal          112
+    ##                     # of Samples # of Genes
+    ## all                         1212      20501
+    ## primary.solid.tumor         1093      20501
+    ## metastatic                     7      20501
+    ## solid.tissue.normal          112      20501
 
 ### Store all patient's barcode from `tissue` in `tissue.barcode`
 
@@ -315,7 +315,7 @@ colnames(sample.size) <- c('# of Samples', '# of Features')
 futile.logger::flog.info('Clinical information per tissue type:', sample.size, capture = TRUE)
 ```
 
-    ## INFO [2016-11-21 19:38:00] Clinical information per tissue type:
+    ## INFO [2016-11-21 19:42:24] Clinical information per tissue type:
     ## 
     ##                     # of Samples # of Features
     ## all                         1212            18
