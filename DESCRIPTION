@@ -1,9 +1,15 @@
-Package: brca
-Title: What the Package Does (one line, title case)
-Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
-Depends: R (>= 3.3.2)
-License: What license is it under?
+Package: brca.data
+Title: BRCA gene expression and clinical data from TCGA (with import script)
+Version: 1.0
+Authors@R: person("André", "Veríssimo", email = "andre.verissimo@tecnico.ulisboa.pt", role = c("aut", "cre"))
+Description: Contains the datasets for BRCA (breast cancer) with gene expression
+    and clinical data. All was extracted from TCGA.
+Depends:
+    R (>= 3.3.2)
+License: GPL-3
 Encoding: UTF-8
 LazyData: true
+Suggests:
+    futile.logger,
+    TCGA2STATS
+RoxygenNote: 5.0.1
