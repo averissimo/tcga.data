@@ -1,21 +1,26 @@
 Import BRCA dataset from TCGA
 ================
-André Veríssimo Marta Lopes
+André Veríssimo *and* Marta Lopes
 November 2016
 
--   [How to use the dataset](#how-to-use-the-dataset)
-    -   [Example](#example)
--   [Description of the data set](#description-of-the-data-set)
--   [Loading data from TCGA](#loading-data-from-tcga)
-    -   [Importing using TCGA2STAT package](#importing-using-tcga2stat-package)
-    -   [Explaining the TCGA codes](#explaining-the-tcga-codes)
-    -   [Extracting all the barcodes](#extracting-all-the-barcodes)
--   [Processing the data](#processing-the-data)
-    -   [Mapping all types of sample (tumor, normal, metastases, control...)](#mapping-all-types-of-sample-tumor-normal-metastases-control...)
-    -   [Size of data from each tissue](#size-of-data-from-each-tissue)
-    -   [Store all patient's barcode from `tissue` in `tissue.barcode`](#store-all-patients-barcode-from-tissue-in-tissue.barcode)
-    -   [Store patient's clinical data](#store-patients-clinical-data)
--   [Exported data](#exported-data)
+-   [Package information](#package-information)
+    -   [How to use the dataset](#how-to-use-the-dataset)
+        -   [Example](#example)
+    -   [Description of the data set](#description-of-the-data-set)
+        -   [Explaining the TCGA codes](#explaining-the-tcga-codes)
+-   [Script to generate the package data](#script-to-generate-the-package-data)
+    -   [Loading data from TCGA](#loading-data-from-tcga)
+        -   [Importing using TCGA2STAT package](#importing-using-tcga2stat-package)
+        -   [Extracting all the barcodes](#extracting-all-the-barcodes)
+    -   [Processing the data](#processing-the-data)
+        -   [Mapping all types of sample (tumor, normal, metastases, control...)](#mapping-all-types-of-sample-tumor-normal-metastases-control...)
+        -   [Size of data from each tissue](#size-of-data-from-each-tissue)
+        -   [Store all patient's barcode from `tissue` in `tissue.barcode`](#store-all-patients-barcode-from-tissue-in-tissue.barcode)
+        -   [Store patient's clinical data](#store-patients-clinical-data)
+    -   [Exported data](#exported-data)
+
+Package information
+===================
 
 How to use the dataset
 ----------------------
@@ -58,25 +63,6 @@ The BRCA data is publicly available (<https://gdc-portal.nci.nih.gov/>) and is d
 1.  the gene expression data, composed of `20501` variables for a total of `1205` samples with `1093` individuals. From those samples, `1093` with primary solid tumor and `112` with normal tissue;
 
 2.  the clinical data is composed of 18 variables obtained from the same individuals.
-
-Loading data from TCGA
-----------------------
-
-### Importing using TCGA2STAT package
-
-The BRCA data set can also be extracted through the [TCGA2STAT R package](https://cran.r-project.org/web/packages/TCGA2STAT/index.html)
-
-``` r
-library(TCGA2STAT)
-library(futile.logger)
-
-if (file.exists('cache.RData')) {
-  load('cache.RData')
-} else {
-  brca <- TCGA2STAT::getTCGA(disease = "BRCA", data.type = "RNASeq2", type = "RPKM", clinical = TRUE)
-  save(brca, file = 'cache.RData')
-}
-```
 
 ### Explaining the TCGA codes
 
@@ -174,6 +160,44 @@ Explanation of TCGA barcode using example `TCGA-02-0001-01C-01D-0182-01`
 </tbody>
 </table>
 
+Script to generate the package data
+===================================
+
+``` r
+#
+#
+#
+#
+# This now documents the generation of the dataset.
+#
+# No longer a generic documentation of the package!
+#
+# 
+#
+```
+
+Loading data from TCGA
+----------------------
+
+### Importing using TCGA2STAT package
+
+The BRCA data set can also be extracted through the [TCGA2STAT R package](https://cran.r-project.org/web/packages/TCGA2STAT/index.html)
+
+``` r
+# Library that downloads the data
+library(TCGA2STAT)
+# Library to print some information
+library(futile.logger)
+# Cached filed is used internally for the generation of this document. Not included in package.
+#  As only the post-processed variables are of interest.
+if (file.exists('cache.RData')) {
+  load('cache.RData')
+} else {
+  brca <- TCGA2STAT::getTCGA(disease = "BRCA", data.type = "RNASeq2", type = "RPKM", clinical = TRUE)
+  save(brca, file = 'cache.RData')
+}
+```
+
 ### Extracting all the barcodes
 
 Pattern to retrieve TCGA patient and sample type from extended barcode.
@@ -260,7 +284,7 @@ colnames(sample.size) <- '# of Samples'
 futile.logger::flog.info('Tissue information per tissue type:', sample.size, capture = TRUE)
 ```
 
-    ## INFO [2016-11-21 19:31:03] Tissue information per tissue type:
+    ## INFO [2016-11-21 19:37:59] Tissue information per tissue type:
     ## 
     ##                     # of Samples
     ## all                         1212
@@ -291,7 +315,7 @@ colnames(sample.size) <- c('# of Samples', '# of Features')
 futile.logger::flog.info('Clinical information per tissue type:', sample.size, capture = TRUE)
 ```
 
-    ## INFO [2016-11-21 19:31:03] Clinical information per tissue type:
+    ## INFO [2016-11-21 19:38:00] Clinical information per tissue type:
     ## 
     ##                     # of Samples # of Features
     ## all                         1212            18

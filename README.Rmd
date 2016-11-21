@@ -1,6 +1,6 @@
 ---
 title: "Import BRCA dataset from TCGA"
-author: "André Veríssimo Marta Lopes"
+author: "André Veríssimo *and* Marta Lopes"
 date: "November 2016"
 output:
   github_document:
@@ -10,6 +10,8 @@ output:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
 ```
+
+# Package information
 
 ## How to use the dataset
 
@@ -51,24 +53,6 @@ The BRCA data is publicly available (https://gdc-portal.nci.nih.gov/) and is dec
 
 1. the clinical data is composed of 18 variables obtained from the same individuals.
 
-## Loading data from TCGA
-
-### Importing using TCGA2STAT package
-
-The BRCA data set can also be extracted through the [TCGA2STAT R package](https://cran.r-project.org/web/packages/TCGA2STAT/index.html)
-
-```{r load_data_and_libraries}
-library(TCGA2STAT)
-library(futile.logger)
-
-if (file.exists('cache.RData')) {
-  load('cache.RData')
-} else {
-  brca <- TCGA2STAT::getTCGA(disease = "BRCA", data.type = "RNASeq2", type = "RPKM", clinical = TRUE)
-  save(brca, file = 'cache.RData')
-}
-```
-
 ### Explaining the TCGA codes
 
 The following links explain (1) the individuals' barcode and (2) the sample type code:
@@ -92,6 +76,42 @@ Explanation of TCGA barcode using example `TCGA-02-0001-01C-01D-0182-01`
 | Analyte     | Molecular type of analyte for analysis         | D | The analyte is a DNA sample | See [Code Tables Report](https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables/portion-analyte-codes) |
 | Plate       | Order of plate in a sequence of 96-well plates | 0182 | The 182nd plate | 4-digit alphanumeric value |
 | Center      | Sequencing or characterization center that will receive the aliquot for analysis | 01 | The Broad Institute GCC | See [Code Tables Report](https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables/center-codes) |
+
+# Script to generate the package data
+
+```{r}
+#
+#
+#
+#
+# This now documents the generation of the dataset.
+#
+# No longer a generic documentation of the package!
+#
+# 
+#
+```
+
+## Loading data from TCGA
+
+### Importing using TCGA2STAT package
+
+The BRCA data set can also be extracted through the [TCGA2STAT R package](https://cran.r-project.org/web/packages/TCGA2STAT/index.html)
+
+```{r load_data_and_libraries}
+# Library that downloads the data
+library(TCGA2STAT)
+# Library to print some information
+library(futile.logger)
+# Cached filed is used internally for the generation of this document. Not included in package.
+#  As only the post-processed variables are of interest.
+if (file.exists('cache.RData')) {
+  load('cache.RData')
+} else {
+  brca <- TCGA2STAT::getTCGA(disease = "BRCA", data.type = "RNASeq2", type = "RPKM", clinical = TRUE)
+  save(brca, file = 'cache.RData')
+}
+```
 
 ### Extracting all the barcodes
 
