@@ -1,8 +1,10 @@
 Import BRCA dataset from TCGA
 ================
-Marta Lopes and André Veríssimo
+André Veríssimo Marta Lopes
 November 2016
 
+-   [How to use the dataset](#how-to-use-the-dataset)
+    -   [Example](#example)
 -   [Description of the data set](#description-of-the-data-set)
 -   [Loading data from TCGA](#loading-data-from-tcga)
     -   [Importing using TCGA2STAT package](#importing-using-tcga2stat-package)
@@ -14,6 +16,37 @@ November 2016
     -   [Store all patient's barcode from `tissue` in `tissue.barcode`](#store-all-patients-barcode-from-tissue-in-tissue.barcode)
     -   [Store patient's clinical data](#store-patients-clinical-data)
 -   [Exported data](#exported-data)
+
+How to use the dataset
+----------------------
+
+1.  Install brca.data by using `devtools` package.
+
+2.  Load the library
+
+3.  Load the required datasets (one or more of the following)
+    -   `clinical`
+    -   `tissue`
+    -   `tissue.all`
+    -   `tissue.barcode`
+    -   `tissue.ix`
+
+### Example
+
+``` r
+# load library or use directly if insta
+install.packages('devtools')
+# The library can also be loaded and use the function install_git without 'devtools::' prefix
+devtools::install_git('http://sels.tecnico.ulisboa.pt/gitlab/averissimo/rpackage-brca.git')
+#
+# Load the brca.data package
+library(brca.data)
+# start using the data, for example the tissue data
+data(tissue)
+# tissue is now in the enviromnet and will be loaded on the first
+#  time it is used. For example:
+names(tissue)
+```
 
 Description of the data set
 ---------------------------
@@ -36,14 +69,14 @@ The BRCA data set can also be extracted through the [TCGA2STAT R package](https:
 ``` r
 library(TCGA2STAT)
 library(futile.logger)
-brca <- getTCGA(disease = "BRCA", data.type = "RNASeq2", type = "RPKM", clinical = TRUE)
+
+if (file.exists('cache.RData')) {
+  load('cache.RData')
+} else {
+  brca <- TCGA2STAT::getTCGA(disease = "BRCA", data.type = "RNASeq2", type = "RPKM", clinical = TRUE)
+  save(brca, file = 'cache.RData')
+}
 ```
-
-    ## RNASeqV2 data will be imported! This may take some time!
-
-    ## 20501 genes have been imported!
-
-    ## Clinical data will be imported.
 
 ### Explaining the TCGA codes
 
@@ -224,10 +257,10 @@ for (el in names(tissue)) {
 }
 rownames(sample.size) <- names(tissue)
 colnames(sample.size) <- '# of Samples'
-flog.info('Tissue information per tissue type:', sample.size, capture = TRUE)
+futile.logger::flog.info('Tissue information per tissue type:', sample.size, capture = TRUE)
 ```
 
-    ## INFO [2016-11-21 19:13:09] Tissue information per tissue type:
+    ## INFO [2016-11-21 19:31:03] Tissue information per tissue type:
     ## 
     ##                     # of Samples
     ## all                         1212
@@ -255,10 +288,10 @@ for (el in names(clinical)) {
 }
 rownames(sample.size) <- names(tissue)
 colnames(sample.size) <- c('# of Samples', '# of Features')
-flog.info('Clinical information per tissue type:', sample.size, capture = TRUE)
+futile.logger::flog.info('Clinical information per tissue type:', sample.size, capture = TRUE)
 ```
 
-    ## INFO [2016-11-21 19:13:09] Clinical information per tissue type:
+    ## INFO [2016-11-21 19:31:03] Clinical information per tissue type:
     ## 
     ##                     # of Samples # of Features
     ## all                         1212            18
@@ -279,7 +312,9 @@ Exported data
 # Extract all expression data to a different variable to remove redundancy in `tissue`
 tissue.all     <- tissue$all
 tissue$all     <- 'Stored in tissue.all in brca.data package'
-devtools::use_data(tissue.ix, tissue, tissue.barcode, clinical, tissue.all, overwrite = TRUE)
+#
+#
+# Uncomment to update data variables
+#
+# devtools::use_data(tissue.ix, tissue, tissue.barcode, clinical, tissue.all, overwrite = TRUE)
 ```
-
-    ## Saving tissue.ix, tissue, tissue.barcode, clinical, tissue.all as tissue.ix.rda, tissue.rda, tissue.barcode.rda, clinical.rda, tissue.all.rda

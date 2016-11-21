@@ -11,5 +11,5 @@ Encoding: UTF-8
 LazyData: true
 Suggests:
     futile.logger,
-    TCGA2STATS
+    TCGA2STAT
 RoxygenNote: 5.0.1

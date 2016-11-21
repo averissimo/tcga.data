@@ -1,6 +1,6 @@
 ---
 title: "Import BRCA dataset from TCGA"
-author: "Marta Lopes and André Veríssimo"
+author: "André Veríssimo Marta Lopes"
 date: "November 2016"
 output:
   github_document:
@@ -9,6 +9,36 @@ output:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
+```
+
+## How to use the dataset
+
+1. Install brca.data by using `devtools` package.
+
+1. Load the library
+
+1. Load the required datasets (one or more of the following)
+    - `clinical`
+    - `tissue`
+    - `tissue.all`
+    - `tissue.barcode`
+    - `tissue.ix`
+
+### Example
+
+```{r install_brca.data, eval=FALSE}
+# load library or use directly if insta
+install.packages('devtools')
+# The library can also be loaded and use the function install_git without 'devtools::' prefix
+devtools::install_git('http://sels.tecnico.ulisboa.pt/gitlab/averissimo/rpackage-brca.git')
+#
+# Load the brca.data package
+library(brca.data)
+# start using the data, for example the tissue data
+data(tissue)
+# tissue is now in the enviromnet and will be loaded on the first
+#  time it is used. For example:
+names(tissue)
 ```
 
 ## Description of the data set
@@ -30,7 +60,13 @@ The BRCA data set can also be extracted through the [TCGA2STAT R package](https:
 ```{r load_data_and_libraries}
 library(TCGA2STAT)
 library(futile.logger)
-brca <- getTCGA(disease = "BRCA", data.type = "RNASeq2", type = "RPKM", clinical = TRUE)
+
+if (file.exists('cache.RData')) {
+  load('cache.RData')
+} else {
+  brca <- TCGA2STAT::getTCGA(disease = "BRCA", data.type = "RNASeq2", type = "RPKM", clinical = TRUE)
+  save(brca, file = 'cache.RData')
+}
 ```
 
 ### Explaining the TCGA codes
@@ -140,7 +176,7 @@ for (el in names(tissue)) {
 }
 rownames(sample.size) <- names(tissue)
 colnames(sample.size) <- '# of Samples'
-flog.info('Tissue information per tissue type:', sample.size, capture = TRUE)
+futile.logger::flog.info('Tissue information per tissue type:', sample.size, capture = TRUE)
 ```
 
 ### Store all patient's barcode from `tissue` in `tissue.barcode`
@@ -163,7 +199,7 @@ for (el in names(clinical)) {
 }
 rownames(sample.size) <- names(tissue)
 colnames(sample.size) <- c('# of Samples', '# of Features')
-flog.info('Clinical information per tissue type:', sample.size, capture = TRUE)
+futile.logger::flog.info('Clinical information per tissue type:', sample.size, capture = TRUE)
 ```
 
 
@@ -179,6 +215,10 @@ flog.info('Clinical information per tissue type:', sample.size, capture = TRUE)
 # Extract all expression data to a different variable to remove redundancy in `tissue`
 tissue.all     <- tissue$all
 tissue$all     <- 'Stored in tissue.all in brca.data package'
-devtools::use_data(tissue.ix, tissue, tissue.barcode, clinical, tissue.all, overwrite = TRUE)
+#
+#
+# Uncomment to update data variables
+#
+# devtools::use_data(tissue.ix, tissue, tissue.barcode, clinical, tissue.all, overwrite = TRUE)
 ```
 
