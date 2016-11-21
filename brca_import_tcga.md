@@ -158,9 +158,14 @@ tissue.barcode$all <- gsub(tcga.barcode.pattern, '\\1', colnames(brca$dat))
 tissue <- list()
 tissue$all <- brca$dat
 #
-# auxiliary function to get patient part of barcode (TCGA-XX-XXXX)
-getParticipantCode <- function(fullBarcode) {
-  return(gsub(tcga.barcode.pattern, '\\1', fullBarcode))
+# clinical data
+clinical <- list()
+clinical$all <- brca$clinical
+#
+#
+getParticipant <- function(fullBarcode) {
+  source('R/functions.R')
+  getParticipantCode(fullBarcode)
 }
 ```
 
@@ -222,7 +227,7 @@ colnames(sample.size) <- '# of Samples'
 flog.info('Tissue information per tissue type:', sample.size, capture = TRUE)
 ```
 
-    ## INFO [2016-11-21 18:35:59] Tissue information per tissue type:
+    ## INFO [2016-11-21 19:13:09] Tissue information per tissue type:
     ## 
     ##                     # of Samples
     ## all                         1212
@@ -234,16 +239,15 @@ flog.info('Tissue information per tissue type:', sample.size, capture = TRUE)
 
 ``` r
 for (el in names(tissue)) {
-  tissue.barcode[[el]] <- getParticipantCode(colnames(tissue[[el]]))
+  tissue.barcode[[el]] <- getParticipant(colnames(tissue[[el]]))
 }
 ```
 
 ### Store patient's clinical data
 
 ``` r
-clinical <- list()
 for (el in names(tissue)) {
-  clinical[[el]] <- brca$clinical[tissue.barcode[[el]],]
+  clinical[[el]] <- clinical$all[tissue.barcode[[el]],]
 }
 sample.size <- c()
 for (el in names(clinical)) {
@@ -254,7 +258,7 @@ colnames(sample.size) <- c('# of Samples', '# of Features')
 flog.info('Clinical information per tissue type:', sample.size, capture = TRUE)
 ```
 
-    ## INFO [2016-11-21 18:35:59] Clinical information per tissue type:
+    ## INFO [2016-11-21 19:13:09] Clinical information per tissue type:
     ## 
     ##                     # of Samples # of Features
     ## all                         1212            18
@@ -272,7 +276,10 @@ Exported data
 -   `clinical`: Clinical data per tissue type. Has the same structure as tissue.
 
 ``` r
-devtools::use_data(tissue.ix, tissue, tissue.barcode, clinical, overwrite = TRUE)
+# Extract all expression data to a different variable to remove redundancy in `tissue`
+tissue.all     <- tissue$all
+tissue$all     <- 'Stored in tissue.all in brca.data package'
+devtools::use_data(tissue.ix, tissue, tissue.barcode, clinical, tissue.all, overwrite = TRUE)
 ```
 
-    ## Saving tissue.ix, tissue, tissue.barcode, clinical as tissue.ix.rda, tissue.rda, tissue.barcode.rda, clinical.rda to ./brca/data
+    ## Saving tissue.ix, tissue, tissue.barcode, clinical, tissue.all as tissue.ix.rda, tissue.rda, tissue.barcode.rda, clinical.rda, tissue.all.rda
