@@ -49,9 +49,9 @@ The Cancer Genome Atlas Breast Invasive Carcinoma (TCGA-BRCA) data collection is
 
 The BRCA data is publicly available (https://gdc-portal.nci.nih.gov/) and is decomposed into two data sets:
 
-1. the gene expression data, composed of `20501` variables for a total of `1205` samples with `1093` individuals. From those samples, `1093` with primary solid tumor and `112` with normal tissue;
+1. the gene expression data, composed of `57251` variables for a total of `1222` samples with `1097` individuals. From those samples, `1102` with primary solid tumor, `7` metastatic and `113` with normal tissue;
 
-1. the clinical data is composed of 18 variables obtained from the same individuals.
+1. the clinical data is composed of 113 variables obtained from the same individuals. (much more is available in the gdc data variable, such as follow_up, drug, radiation, ...)
 
 ### Explaining the TCGA codes
 

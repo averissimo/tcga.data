@@ -62,9 +62,9 @@ The Cancer Genome Atlas Breast Invasive Carcinoma (TCGA-BRCA) data collection is
 
 The BRCA data is publicly available (<https://gdc-portal.nci.nih.gov/>) and is decomposed into two data sets:
 
-1.  the gene expression data, composed of `20501` variables for a total of `1205` samples with `1093` individuals. From those samples, `1093` with primary solid tumor and `112` with normal tissue;
+1.  the gene expression data, composed of `57251` variables for a total of `1222` samples with `1097` individuals. From those samples, `1102` with primary solid tumor, `7` metastatic and `113` with normal tissue;
 
-2.  the clinical data is composed of 18 variables obtained from the same individuals.
+2.  the clinical data is composed of 113 variables obtained from the same individuals. (much more is available in the gdc data variable, such as follow\_up, drug, radiation, ...)
 
 ### Explaining the TCGA codes
 
@@ -359,7 +359,7 @@ colnames(sample.size) <- c('# of Samples', '# of Genes')
 futile.logger::flog.info('Tissue information per tissue type:', sample.size, capture = TRUE)
 ```
 
-    ## INFO [2016-11-22 20:12:30] Tissue information per tissue type:
+    ## INFO [2016-11-22 22:09:45] Tissue information per tissue type:
     ## 
     ##                     # of Samples # of Genes
     ## all                         1222      57251
@@ -390,7 +390,7 @@ colnames(sample.size) <- c('# of Samples', '# of Features')
 futile.logger::flog.info('Clinical information per tissue type:', sample.size, capture = TRUE)
 ```
 
-    ## INFO [2016-11-22 20:12:30] Clinical information per tissue type:
+    ## INFO [2016-11-22 22:09:45] Clinical information per tissue type:
     ## 
     ##                     # of Samples # of Features
     ## all                         1222           113
@@ -422,7 +422,7 @@ mutations.by.case$rel.unique.case <- mutations.by.case$case / mutations.by.case$
 flog.info('Summary of count of mutations (with repeated)', summary(mutations.by.case$case), capture = TRUE)
 ```
 
-    ## INFO [2016-11-22 20:13:15] Summary of count of mutations (with repeated)
+    ## INFO [2016-11-22 22:10:30] Summary of count of mutations (with repeated)
     ## 
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
     ##    0.00   19.00   30.00   67.23   60.00 5045.00
@@ -431,7 +431,7 @@ flog.info('Summary of count of mutations (with repeated)', summary(mutations.by.
 flog.info('Summary of count of mutations (unique only)', summary(mutations.by.case$unique), capture = TRUE)
 ```
 
-    ## INFO [2016-11-22 20:13:15] Summary of count of mutations (unique only)
+    ## INFO [2016-11-22 22:10:30] Summary of count of mutations (unique only)
     ## 
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
     ##    0.00   18.00   29.00   63.09   58.00 3959.00
