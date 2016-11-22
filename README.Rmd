@@ -138,6 +138,15 @@ if (file.exists(cached.file)) {
   GDCdownload(query$rnaseq, method = 'api')
   gdc$rnaseq <- GDCprepare(query$rnaseq)
   #
+  query$mutation <- GDCquery(project = project,
+                             data.category = "Simple Nucleotide Variation",
+                             data.type     = "Masked Somatic Mutation",
+                             workflow.type = "MuSE Variant Aggregation and Masking")
+  GDCdownload(query$mutation, method = 'api')
+  gdc$mutation <- GDCprepare(query$mutation)
+  # clean up table by removing all rows that are NA
+  gdc$mutation <- gdc$mutation[,colSums(is.na(gdc$mutation)) != nrow(gdc$mutation)]
+  #
   save(gdc, query,
        file = cached.file)
 }
@@ -148,11 +157,19 @@ if (file.exists(cached.file)) {
 ```{r load_libraries}
 # Library to print some information
 library(futile.logger)
+library(ggplot2)
+library(tibble)
+library(dplyr)
+library(Matrix)
 #
 # this is distributed as part of the package
 getParticipant <- function(fullBarcode) {
   source('R/functions.R')
   getParticipantCode(fullBarcode)
+}
+getSample <- function(fullBarcode) {
+  source('R/functions.R')
+  getSampleTypeCode(fullBarcode)
 }
 ```
 
@@ -167,15 +184,17 @@ tcga.barcode.pattern <- '(TCGA-[A-Z0-9a-z]{2}-[a-zA-Z0-9]{4})-([0-9]{2}).+'
 #
 # patient barcode for each column in tcga.data$dat
 tissue.barcode <- list()
-tissue.barcode$all <- gsub(tcga.barcode.pattern, '\\1', gdc$rnaseq@colData$barcode)
+tissue.barcode$all <- getParticipant(gdc$rnaseq@colData$barcode)
 #
 # getting all tisues
 tissue <- list()
-tissue$all <- gdc$rnaseq@assays$data[['HTSeq - FPKM']]
+tissue$all <- as.matrix(gdc$rnaseq@assays$data[['HTSeq - FPKM']])
 colnames(tissue$all) <- gdc$rnaseq@colData$barcode
+#
 rownames(tissue$all) <- gdc$rnaseq@rowRanges$ensembl_gene_id
+#
 gene.ranges <- gdc$rnaseq@rowRanges
-
+#
 # clinical data
 clinical <- list()
 clinical$all <- gdc$clinical
@@ -189,7 +208,7 @@ See [Code Tables Report](https://gdc.cancer.gov/resources-tcga-users/tcga-code-t
 
 ```{r tissue_mapping}
 # sample type per sample
-tissue.type  <- as.numeric(gsub(tcga.barcode.pattern,'\\2', colnames(tissue$all)))
+tissue.type  <- as.numeric(getSample(colnames(tissue$all)))
 #
 # mapping for tissue type
 tissue.mapping <- list( 
@@ -261,6 +280,116 @@ colnames(sample.size) <- c('# of Samples', '# of Features')
 futile.logger::flog.info('Clinical information per tissue type:', sample.size, capture = TRUE)
 ```
 
+### Mutations
+
+```{r mutations}
+#
+# Somatic mutations data
+mutations <- matrix(0, ncol = nrow(gdc$clinical), nrow = length(gdc$mutation$Gene), dimnames = list(gdc$mutation$Gene, gdc$clinical$bcr_patient_barcode))
+# get a temporary index list for fast access
+ix.list <- cbind(gdc$mutation$Gene, getParticipant(gdc$mutation$Tumor_Sample_Barcode))
+# this is a long run, should be as simple as possible
+for(ix in seq(length(gdc$mutation$Gene))) {
+  mutations[ix.list[ix,1], ix.list[ix,2]] <- mutations[ix.list[ix,1], ix.list[ix,2]] + 1
+}
+```
+#### Analysis of Raw Mutation Results
+
+```{r mutation_hist}
+# analyse raw mutation results
+mutations.by.case <- data.frame(ix = seq(ncol(mutations)), case = colSums(mutations), unique = colSums(mutations != 0))
+mutations.by.case$rel.unique.case <- mutations.by.case$case / mutations.by.case$unique
+#
+flog.info('Summary of count of mutations (with repeated)', summary(mutations.by.case$case), capture = TRUE)
+flog.info('Summary of count of mutations (unique only)', summary(mutations.by.case$unique), capture = TRUE)
+#
+ggplot(data = mutations.by.case) + 
+  theme_minimal() +
+  geom_point(data = base::subset(mutations.by.case, rel.unique.case <= 1.2), aes(x = ix, y = unique, colour = rel.unique.case)) + 
+  geom_point(data = base::subset(mutations.by.case, rel.unique.case > 1.2),  aes(x = ix, y = unique, colour = rel.unique.case)) + 
+  geom_point(data = base::subset(mutations.by.case, rel.unique.case > 1.4),  aes(x = ix, y = unique, colour = rel.unique.case)) + 
+  geom_point(data = base::subset(mutations.by.case, rel.unique.case > 1.6),  aes(x = ix, y = unique, colour = rel.unique.case)) + 
+  geom_point(data = base::subset(mutations.by.case, rel.unique.case > 1.8),  aes(x = ix, y = unique, colour = rel.unique.case)) + 
+  scale_colour_gradient('Sum/Unique (per case)', high = 'red', low = 'green') +
+  labs(title="Histogram for Mutations by Case") +
+  labs(x="Age", y="Unique count of mutations")
+```
+
+Other than duplicates identified from different samples, all other mutations seem to be on different positions of the same gene.
+
+Therefore, they will be counted!
+
+```{r}
+# Filter out cases that have unique mutations
+my.dup <- mutations.by.case[mutations.by.case$case != mutations.by.case$unique,]
+# Sort by descending order of cases that have biggest difference between mutations and unique count
+my.dup <- my.dup[sort(my.dup$case / my.dup$unique, index.return = TRUE, decreasing = TRUE)$ix,]
+# Look at top case!
+test.case <- rownames(my.dup)
+# Get the GDC rows that map to the top case
+test.mat <- gdc$mutation[getParticipantCode(gdc$mutation$Tumor_Sample_Barcode) %in% test.case,]
+# Choose only genes that are duplicated
+uniq.id  <- paste0(test.mat$Hugo_Symbol, getParticipantCode(test.mat$Tumor_Sample_Barcode))
+test.mat <- test.mat[duplicated(uniq.id) | duplicated(uniq.id, fromLast = TRUE),]
+# Sort by Hugo_Symbol to have the same gene in consecutive lines
+test.mat <- arrange(test.mat, Hugo_Symbol, barcode = getParticipantCode(test.mat$Tumor_Sample_Barcode))
+# Chose randomly
+# A2ML1 <- same type of mutation on the same gene
+# AAK1  <- two types of variant on different positions on the same gene
+# AC097711.1 and CEP128 <- Two different types of samples (tumour / metastases)
+gene.test.list <- c('AAK1', 'A2ML1', 'AC097711.1')
+diff.columns <- array(FALSE, ncol(test.mat))
+# add some important ones
+diff.columns[c(1,5,6,7,8,9)] <- TRUE
+for (gene.test in gene.test.list) {
+  my.case <- test.mat[test.mat$Hugo_Symbol == gene.test,]
+  for (ix in 2:nrow(my.case)) {
+    diff.columns = diff.columns | as.vector(my.case[ix - 1,] != my.case[ix,])
+  }
+  diff.columns[is.na(diff.columns)] <- FALSE
+}
+my.analysis <- test.mat[test.mat$Hugo_Symbol %in% gene.test.list,diff.columns]
+# Only a subset of columns are displayed
+my.analysis
+```
+
+Cases to ignore:
+
+- From case `A2ML1` we found multiple mutations on different postition on the same gene
+- From case `AAK1` two types of variant on different positions on the same gene
+
+Cases to remove duplicates:
+
+- From case `CEP128` and `AC097711.1` we found that there are duplicates from different samples per individual (Tumour and Metastases), which we will discard one.
+
+
+```{r discard_dups_in_same_position}
+mutation <- list()
+# remove duplicate mutations on same position
+mutation$data <- distinct(gdc$mutation, Hugo_Symbol, Chromosome, Start_Position, End_Position, Strand, .keep_all = T)
+dups.ix       <- paste0(gdc$mutation$Hugo_Symbol, gdc$mutation$Chromosome, gdc$mutation$Start_Position, gdc$mutation$End_Position, gdc$mutation$Strand)
+#
+# check if the number of duplicated are the same
+# flog.info('Is the number of discarded row from distict the same as duplicated? R: %s', nrow(gdc$mutation) - nrow(mutation) == sum(duplicated(dups.ix)))
+#
+#
+mutation$dups <- gdc$mutation[duplicated(dups.ix) | duplicated(dups.ix, fromLast = TRUE),]
+mutation$dups <- dplyr::arrange(mutation$dups, Hugo_Symbol, Tumor_Sample_Barcode)
+```
+
+#### Recalculate Mutations count of (row: gene) x (col: case)
+
+```{r calc_mutations_count}
+mutation$count <- matrix(0, ncol = nrow(gdc$clinical), nrow = length(mutation$data$Gene), 
+                         dimnames = list(mutation$data$Gene, gdc$clinical$bcr_patient_barcode))
+# get a temporary index list for fast access
+ix.list <- cbind(mutation$data$Gene, getParticipant(mutation$data$Tumor_Sample_Barcode))
+# this is a long run, should be as simple as possible
+for(ix in seq(length(mutation$data$Gene))) {
+  mutation$count[ix.list[ix,1], ix.list[ix,2]] <- mutation$count[ix.list[ix,1], ix.list[ix,2]] + 1
+}
+mutation$count <- Matrix(mutation$count, sparse = TRUE)
+```
 
 ## Exported data
 
@@ -269,6 +398,7 @@ futile.logger::flog.info('Clinical information per tissue type:', sample.size, c
 - `tissue`: gene expression data for all types of tissues, see `names(tissue)`;
 - `tissue.barcode`: Patient's participation data code (TCGA-XX-XXXX) per type of tissue;
 - `clinical`: Clinical data per tissue type. Has the same structure as tissue.
+- `mutation`: Mutation data from GDC (filtered) and a matrix of counts.
 
 ```{r export_data}
 # Extract all expression data to a different variable to remove redundancy in `tissue`
@@ -285,4 +415,5 @@ tissue$all     <- 'Stored in tissue.all in brca.data package'
 # devtools::use_data(clinical,       overwrite = TRUE)
 # devtools::use_data(tissue.all,     overwrite = TRUE)
 # devtools::use_data(gene.ranges,    overwrite = TRUE)
+# devtools::use_data(mutation,       overwrite = TRUE)
 ```

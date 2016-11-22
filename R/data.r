@@ -11,7 +11,7 @@
 #' @source \url{https://gdc-portal.nci.nih.gov/projects/TCGA-BRCA}
 "tissue"
 
-#' Gene expression per tissue.
+#' Gene expression for all tissue samples.
 #'
 #' Matrix with all samples gene expression from RNASeq v2 FPKM (rows: genomic ranges) x (columns: patients)
 #'
@@ -35,7 +35,6 @@
 #'
 #' A dataset containing a list of vectors with TCGA barcodes per tissue type.
 #'
-#' @format A list with RPKM gene expression data.
 #' @source \url{https://gdc-portal.nci.nih.gov/projects/TCGA-BRCA}
 "tissue.barcode"
 
@@ -43,7 +42,6 @@
 #'
 #' A dataset containing a list of dataframes with clinical data per tissue type.
 #'
-#' @format A list with RPKM gene expression data.
 #' @source \url{https://gdc-portal.nci.nih.gov/projects/TCGA-BRCA}
 "clinical"
 
@@ -51,6 +49,25 @@
 #'
 #' Contains ensembl id and external gene names.
 #'
-#' @format A list with RPKM gene expression data.
 #' @source \url{https://gdc-portal.nci.nih.gov/projects/TCGA-BRCA}
 "gene.ranges"
+
+#' List with mutation data
+#'
+#' Contains:
+#' - Count of mutations per each pair of gene/case
+#' - Original data from gdc (filtered out duplicate rows)
+#' - Duplicated rows that were filtered
+#'
+#' @source \url{https://gdc-portal.nci.nih.gov/projects/TCGA-BRCA}
+"mutation"
+
+#' Original data from GDC
+#'
+#' Contains:
+#' - All clinical data (clinical, follow-up, etc..)
+#' - Gene expression data
+#' - Mutation data
+#'
+#' @source \url{https://gdc-portal.nci.nih.gov/projects/TCGA-BRCA}
+"gdc"

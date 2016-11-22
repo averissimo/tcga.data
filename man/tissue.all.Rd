@@ -3,7 +3,7 @@
 \docType{data}
 \name{tissue.all}
 \alias{tissue.all}
-\title{Gene expression per tissue.}
+\title{Gene expression for all tissue samples.}
 \format{A matrix with FPKM gene expression data.}
 \source{
 \url{https://gdc-portal.nci.nih.gov/projects/TCGA-BRCA}

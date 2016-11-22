@@ -4,7 +4,7 @@
 \name{tissue.barcode}
 \alias{tissue.barcode}
 \title{Patient's barcode per tissue type}
-\format{A list with RPKM gene expression data.}
+\format{An object of class \code{list} of length 4.}
 \source{
 \url{https://gdc-portal.nci.nih.gov/projects/TCGA-BRCA}
 }
