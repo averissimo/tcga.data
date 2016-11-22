@@ -183,7 +183,7 @@ Loading data from TCGA
 
 ### TCGAbiolinks package
 
-The BRCA data set can also be extracted through the [TCGAbiolings R bioconductor package](https://bioconductor.org/packages/release/bioc/html/TCGAbiolinks.html)
+The BRCA data set can also be extracted through the [TCGAbiolinks R bioconductor package](https://bioconductor.org/packages/release/bioc/html/TCGAbiolinks.html)
 
 ``` r
 source("https://bioconductor.org/biocLite.R")

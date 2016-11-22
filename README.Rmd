@@ -96,7 +96,7 @@ Explanation of TCGA barcode using example `TCGA-02-0001-01C-01D-0182-01`
 
 ### TCGAbiolinks package
 
-The BRCA data set can also be extracted through the [TCGAbiolings R bioconductor package](https://bioconductor.org/packages/release/bioc/html/TCGAbiolinks.html)
+The BRCA data set can also be extracted through the [TCGAbiolinks R bioconductor package](https://bioconductor.org/packages/release/bioc/html/TCGAbiolinks.html)
 
 ```{r install_biolinks, eval = FALSE}
 source("https://bioconductor.org/biocLite.R")
