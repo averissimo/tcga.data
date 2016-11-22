@@ -19,7 +19,6 @@ November 2016
         -   [Store all patient's barcode from `tissue` in `tissue.barcode`](#store-all-patients-barcode-from-tissue-in-tissue.barcode)
         -   [Store patient's clinical data](#store-patients-clinical-data)
         -   [Mutations](#mutations)
-        -   [Recalculate Mutations count of row: gene x col: case](#recalculate-mutations-count-of-row-gene-x-col-case)
     -   [Exported data](#exported-data)
 
 Package information
@@ -360,7 +359,7 @@ colnames(sample.size) <- c('# of Samples', '# of Genes')
 futile.logger::flog.info('Tissue information per tissue type:', sample.size, capture = TRUE)
 ```
 
-    ## INFO [2016-11-22 20:08:00] Tissue information per tissue type:
+    ## INFO [2016-11-22 20:12:30] Tissue information per tissue type:
     ## 
     ##                     # of Samples # of Genes
     ## all                         1222      57251
@@ -391,7 +390,7 @@ colnames(sample.size) <- c('# of Samples', '# of Features')
 futile.logger::flog.info('Clinical information per tissue type:', sample.size, capture = TRUE)
 ```
 
-    ## INFO [2016-11-22 20:08:00] Clinical information per tissue type:
+    ## INFO [2016-11-22 20:12:30] Clinical information per tissue type:
     ## 
     ##                     # of Samples # of Features
     ## all                         1222           113
@@ -413,7 +412,7 @@ for(ix in seq(length(gdc$mutation$Gene))) {
 }
 ```
 
-#### Analyse Raw Mutation Results
+#### Analysis of Raw Mutation Results
 
 ``` r
 # analyse raw mutation results
@@ -423,7 +422,7 @@ mutations.by.case$rel.unique.case <- mutations.by.case$case / mutations.by.case$
 flog.info('Summary of count of mutations (with repeated)', summary(mutations.by.case$case), capture = TRUE)
 ```
 
-    ## INFO [2016-11-22 20:08:45] Summary of count of mutations (with repeated)
+    ## INFO [2016-11-22 20:13:15] Summary of count of mutations (with repeated)
     ## 
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
     ##    0.00   19.00   30.00   67.23   60.00 5045.00
@@ -432,7 +431,7 @@ flog.info('Summary of count of mutations (with repeated)', summary(mutations.by.
 flog.info('Summary of count of mutations (unique only)', summary(mutations.by.case$unique), capture = TRUE)
 ```
 
-    ## INFO [2016-11-22 20:08:45] Summary of count of mutations (unique only)
+    ## INFO [2016-11-22 20:13:15] Summary of count of mutations (unique only)
     ## 
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
     ##    0.00   18.00   29.00   63.09   58.00 3959.00
@@ -511,7 +510,10 @@ my.analysis
     ## #   PolyPhen <chr>, EXON <chr>, DOMAINS <chr>, IMPACT <chr>,
     ## #   src_vcf_id <chr>, tumor_bam_uuid <chr>
 
-Cases to ignore: - From case `A2ML1` we found multiple mutations on different postition on the same gene - From case `AAK1` two types of variant on different positions on the same gene
+Cases to ignore:
+
+-   From case `A2ML1` we found multiple mutations on different postition on the same gene
+-   From case `AAK1` two types of variant on different positions on the same gene
 
 Cases to remove duplicates:
 
@@ -531,7 +533,7 @@ mutation$dups <- gdc$mutation[duplicated(dups.ix) | duplicated(dups.ix, fromLast
 mutation$dups <- dplyr::arrange(mutation$dups, Hugo_Symbol, Tumor_Sample_Barcode)
 ```
 
-### Recalculate Mutations count of row: gene x col: case
+#### Recalculate Mutations count of (row: gene) x (col: case)
 
 ``` r
 mutation$count <- matrix(0, ncol = nrow(gdc$clinical), nrow = length(mutation$data$Gene), 
