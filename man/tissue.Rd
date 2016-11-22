@@ -4,7 +4,7 @@
 \name{tissue}
 \alias{tissue}
 \title{Gene expression per tissue.}
-\format{A list with RPKM gene expression data.}
+\format{A list with FPKM gene expression data.}
 \source{
 \url{https://gdc-portal.nci.nih.gov/projects/TCGA-BRCA}
 }
@@ -12,12 +12,13 @@
 tissue
 }
 \description{
-A dataset containing a list of tissue names from TCGA breast cancer dataset (BRCA).
+List of matrices with RNASeq v2 FPKM (rows: genomic ranges) x (columns: patients)
 }
 \details{
-Each element has a normalized gene expression (RPKM) matrix with genes (rows) x patients (columns).
+FPKM: fragments per kilobase per million
+= [# of fragments]/[length of transcript in kilo base]/[million mapped reads]
 
-For all gene expression data matrix, see `tissue.all` dataset
+For all gene expression data matrix, see `tissue.all` dataset (stored in a different variable for memory optimization)
 }
 \keyword{datasets}
 

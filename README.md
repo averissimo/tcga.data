@@ -284,7 +284,7 @@ colnames(sample.size) <- c('# of Samples', '# of Genes')
 futile.logger::flog.info('Tissue information per tissue type:', sample.size, capture = TRUE)
 ```
 
-    ## INFO [2016-11-21 19:52:43] Tissue information per tissue type:
+    ## INFO [2016-11-22 11:12:21] Tissue information per tissue type:
     ## 
     ##                     # of Samples # of Genes
     ## all                         1212      20501
@@ -315,7 +315,7 @@ colnames(sample.size) <- c('# of Samples', '# of Features')
 futile.logger::flog.info('Clinical information per tissue type:', sample.size, capture = TRUE)
 ```
 
-    ## INFO [2016-11-21 19:52:43] Clinical information per tissue type:
+    ## INFO [2016-11-22 11:12:21] Clinical information per tissue type:
     ## 
     ##                     # of Samples # of Features
     ## all                         1212            18
