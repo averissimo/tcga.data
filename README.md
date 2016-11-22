@@ -37,6 +37,8 @@ How to use the dataset
     -   `tissue.all`
     -   `tissue.barcode`
     -   `tissue.ix`
+    -   `mutation`
+    -   `gdc`
 
 ### Example
 
