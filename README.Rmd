@@ -200,6 +200,7 @@ gene.ranges <- gdc$rnaseq@rowRanges
 # clinical data
 clinical <- list()
 clinical$all <- gdc$clinical
+rownames(gdc$clinical) <- gdc$clinical$bcr_patient_barcode
 ```
 
 ## Processing the data
