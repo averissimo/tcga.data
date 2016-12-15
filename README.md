@@ -33,10 +33,8 @@ How to use the dataset
 
 3.  Load the required datasets (one or more of the following)
     -   `clinical`
-    -   `tissue`
-    -   `tissue.all`
-    -   `tissue.barcode`
-    -   `tissue.ix`
+    -   `fpkm.per.tissue`
+    -   `fpkm.per.tissue.barcode`
     -   `mutation`
     -   `gdc`
 
@@ -51,10 +49,10 @@ devtools::install_git('http://sels.tecnico.ulisboa.pt/gitlab/averissimo/rpackage
 # Load the brca.data package
 library(brca.data)
 # start using the data, for example the tissue data
-data(tissue)
+data(fpkm.per.tissue)
 # tissue is now in the enviromnet and will be loaded on the first
 #  time it is used. For example:
-names(tissue)
+names(fpkm.per.tissue)
 ```
 
 Description of the data set
@@ -286,21 +284,22 @@ Pattern to retrieve TCGA patient and sample type from extended barcode.
 tcga.barcode.pattern <- '(TCGA-[A-Z0-9a-z]{2}-[a-zA-Z0-9]{4})-([0-9]{2}).+'
 #
 # patient barcode for each column in tcga.data$dat
-tissue.barcode <- list()
-tissue.barcode$all <- getParticipant(gdc$rnaseq@colData$barcode)
+fpkm.per.tissue.barcode <- list()
+fpkm.per.tissue.barcode$all <- getParticipant(gdc$rnaseq@colData$barcode)
 #
 # getting all tisues
-tissue <- list()
-tissue$all <- as.matrix(gdc$rnaseq@assays$data[['HTSeq - FPKM']])
-colnames(tissue$all) <- gdc$rnaseq@colData$barcode
+fpkm.per.tissue <- list()
+fpkm.per.tissue$all <- as.matrix(gdc$rnaseq@assays$data[['HTSeq - FPKM']])
+colnames(fpkm.per.tissue$all) <- gdc$rnaseq@colData$barcode
 #
-rownames(tissue$all) <- gdc$rnaseq@rowRanges$ensembl_gene_id
+rownames(fpkm.per.tissue$all) <- gdc$rnaseq@rowRanges$ensembl_gene_id
 #
 gene.ranges <- gdc$rnaseq@rowRanges
 #
 # clinical data
 clinical <- list()
 clinical$all <- gdc$clinical
+rownames(gdc$clinical) <- gdc$clinical$bcr_patient_barcode
 ```
 
 Processing the data
@@ -312,7 +311,7 @@ See [Code Tables Report](https://gdc.cancer.gov/resources-tcga-users/tcga-code-t
 
 ``` r
 # sample type per sample
-tissue.type  <- as.numeric(getSample(colnames(tissue$all)))
+tissue.type  <- as.numeric(getSample(colnames(fpkm.per.tissue$all)))
 #
 # mapping for tissue type
 tissue.mapping <- list( 
@@ -345,7 +344,7 @@ tissue.ix <- list()
 for (el in names(tissue.mapping)) {
   tissue.ix[[el]] <- (tissue.type == tissue.mapping[[el]])
   if (any(tissue.ix[[el]]))
-    tissue[[el]] <- tissue$all[,tissue.ix[[el]]]
+    fpkm.per.tissue[[el]] <- fpkm.per.tissue$all[,tissue.ix[[el]]]
 }
 ```
 
@@ -353,15 +352,15 @@ for (el in names(tissue.mapping)) {
 
 ``` r
 sample.size <- c()
-for (el in names(tissue)) {
-  sample.size <- rbind(sample.size, c(ncol(tissue[[el]]), nrow(tissue[[el]])))
+for (el in names(fpkm.per.tissue)) {
+  sample.size <- rbind(sample.size, c(ncol(fpkm.per.tissue[[el]]), nrow(fpkm.per.tissue[[el]])))
 }
-rownames(sample.size) <- names(tissue)
+rownames(sample.size) <- names(fpkm.per.tissue)
 colnames(sample.size) <- c('# of Samples', '# of Genes')
 futile.logger::flog.info('Tissue information per tissue type:', sample.size, capture = TRUE)
 ```
 
-    ## INFO [2016-11-22 22:09:45] Tissue information per tissue type:
+    ## INFO [2016-12-15 21:55:20] Tissue information per tissue type:
     ## 
     ##                     # of Samples # of Genes
     ## all                         1222      57251
@@ -372,27 +371,27 @@ futile.logger::flog.info('Tissue information per tissue type:', sample.size, cap
 ### Store all patient's barcode from `tissue` in `tissue.barcode`
 
 ``` r
-for (el in names(tissue)) {
-  tissue.barcode[[el]] <- getParticipant(colnames(tissue[[el]]))
+for (el in names(fpkm.per.tissue)) {
+  fpkm.per.tissue.barcode[[el]] <- getParticipant(colnames(fpkm.per.tissue[[el]]))
 }
 ```
 
 ### Store patient's clinical data
 
 ``` r
-for (el in names(tissue)) {
-  clinical[[el]] <- clinical$all[tissue.barcode[[el]],]
+for (el in names(fpkm.per.tissue)) {
+  clinical[[el]] <- clinical$all[fpkm.per.tissue.barcode[[el]],]
 }
 sample.size <- c()
 for (el in names(clinical)) {
   sample.size <- rbind(sample.size, c(nrow(clinical[[el]]), ncol(clinical[[el]])))
 }
-rownames(sample.size) <- names(tissue)
+rownames(sample.size) <- names(fpkm.per.tissue)
 colnames(sample.size) <- c('# of Samples', '# of Features')
 futile.logger::flog.info('Clinical information per tissue type:', sample.size, capture = TRUE)
 ```
 
-    ## INFO [2016-11-22 22:09:45] Clinical information per tissue type:
+    ## INFO [2016-12-15 21:55:20] Clinical information per tissue type:
     ## 
     ##                     # of Samples # of Features
     ## all                         1222           113
@@ -424,7 +423,7 @@ mutations.by.case$rel.unique.case <- mutations.by.case$case / mutations.by.case$
 flog.info('Summary of count of mutations (with repeated)', summary(mutations.by.case$case), capture = TRUE)
 ```
 
-    ## INFO [2016-11-22 22:10:30] Summary of count of mutations (with repeated)
+    ## INFO [2016-12-15 21:56:44] Summary of count of mutations (with repeated)
     ## 
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
     ##    0.00   19.00   30.00   67.23   60.00 5045.00
@@ -433,7 +432,7 @@ flog.info('Summary of count of mutations (with repeated)', summary(mutations.by.
 flog.info('Summary of count of mutations (unique only)', summary(mutations.by.case$unique), capture = TRUE)
 ```
 
-    ## INFO [2016-11-22 22:10:30] Summary of count of mutations (unique only)
+    ## INFO [2016-12-15 21:56:44] Summary of count of mutations (unique only)
     ## 
     ##    Min. 1st Qu.  Median    Mean 3rd Qu.    Max. 
     ##    0.00   18.00   29.00   63.09   58.00 3959.00
@@ -538,7 +537,7 @@ mutation$dups <- dplyr::arrange(mutation$dups, Hugo_Symbol, Tumor_Sample_Barcode
 #### Recalculate Mutations count of (row: gene) x (col: case)
 
 ``` r
-mutation$count <- matrix(0, ncol = nrow(gdc$clinical), nrow = length(mutation$data$Gene), 
+mutation$count <- matrix(integer(1), ncol = nrow(gdc$clinical), nrow = length(mutation$data$Gene), 
                          dimnames = list(mutation$data$Gene, gdc$clinical$bcr_patient_barcode))
 # get a temporary index list for fast access
 ix.list <- cbind(mutation$data$Gene, getParticipant(mutation$data$Tumor_Sample_Barcode))
@@ -552,27 +551,50 @@ mutation$count <- Matrix(mutation$count, sparse = TRUE)
 Exported data
 -------------
 
--   `tissue.ix`: indexes of all tissues;
-    -   Has all types of possible tissue samples;
--   `tissue`: gene expression data for all types of tissues, see `names(tissue)`;
--   `tissue.barcode`: Patient's participation data code (TCGA-XX-XXXX) per type of tissue;
+-   `fpkm.per.tissue`: gene expression data for all types of tissues, see `names(tissue)`;
+-   `fpkm.per.tissue.barcode`: Patient's participation data code (TCGA-XX-XXXX) per type of tissue;
 -   `clinical`: Clinical data per tissue type. Has the same structure as tissue.
 -   `mutation`: Mutation data from GDC (filtered) and a matrix of counts.
 
 ``` r
 # Extract all expression data to a different variable to remove redundancy in `tissue`
-tissue.all     <- tissue$all
-tissue$all     <- 'Stored in tissue.all in brca.data package'
+fpkm.per.tissue$all <- NULL
+gdc$rnaseq     <- 'Use function loadGDCRnaSeq to get the original assay'
 #
 #
 # Uncomment to update data variables
 #
-# devtools::use_data(gdc,            overwrite = TRUE)
-# devtools::use_data(tissue.ix,      overwrite = TRUE)
-# devtools::use_data(tissue,         overwrite = TRUE)
-# devtools::use_data(tissue.barcode, overwrite = TRUE)
-# devtools::use_data(clinical,       overwrite = TRUE)
-# devtools::use_data(tissue.all,     overwrite = TRUE)
-# devtools::use_data(gene.ranges,    overwrite = TRUE)
-# devtools::use_data(mutation,       overwrite = TRUE)
+devtools::use_data(gdc,                     overwrite = TRUE)
 ```
+
+    ## Saving gdc as gdc.rda to /home/averissimo/work/rpackage-brca/data
+
+``` r
+devtools::use_data(fpkm.per.tissue,         overwrite = TRUE)
+```
+
+    ## Saving fpkm.per.tissue as fpkm.per.tissue.rda to /home/averissimo/work/rpackage-brca/data
+
+``` r
+devtools::use_data(fpkm.per.tissue.barcode, overwrite = TRUE)
+```
+
+    ## Saving fpkm.per.tissue.barcode as fpkm.per.tissue.barcode.rda to /home/averissimo/work/rpackage-brca/data
+
+``` r
+devtools::use_data(clinical,                overwrite = TRUE)
+```
+
+    ## Saving clinical as clinical.rda to /home/averissimo/work/rpackage-brca/data
+
+``` r
+devtools::use_data(gene.ranges,             overwrite = TRUE)
+```
+
+    ## Saving gene.ranges as gene.ranges.rda to /home/averissimo/work/rpackage-brca/data
+
+``` r
+devtools::use_data(mutation,                overwrite = TRUE)
+```
+
+    ## Saving mutation as mutation.rda to /home/averissimo/work/rpackage-brca/data

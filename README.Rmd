@@ -407,10 +407,10 @@ gdc$rnaseq     <- 'Use function loadGDCRnaSeq to get the original assay'
 #
 # Uncomment to update data variables
 #
-# devtools::use_data(gdc,                     overwrite = TRUE)
-# devtools::use_data(fpkm.per.tissue,         overwrite = TRUE)
-# devtools::use_data(fpkm.per.tissue.barcode, overwrite = TRUE)
-# devtools::use_data(clinical,                overwrite = TRUE)
-# devtools::use_data(gene.ranges,             overwrite = TRUE)
-# devtools::use_data(mutation,                overwrite = TRUE)
+devtools::use_data(gdc,                     overwrite = TRUE)
+devtools::use_data(fpkm.per.tissue,         overwrite = TRUE)
+devtools::use_data(fpkm.per.tissue.barcode, overwrite = TRUE)
+devtools::use_data(clinical,                overwrite = TRUE)
+devtools::use_data(gene.ranges,             overwrite = TRUE)
+devtools::use_data(mutation,                overwrite = TRUE)
 ```
