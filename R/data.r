@@ -1,42 +1,22 @@
-#' Gene expression per tissue.
+#' Gene expression levels per tissue type.
 #'
 #' List of matrices with RNASeq v2 FPKM (rows: genomic ranges) x (columns: patients)
 #'
 #' FPKM: fragments per kilobase per million
 #' = [# of fragments]/[length of transcript in kilo base]/[million mapped reads]
 #'
-#' For all gene expression data matrix, see `tissue.all` dataset (stored in a different variable for memory optimization)
+#' For all FPKM expression data matrix, run `joinRNASeqData` dataset
 #'
 #' @format A list with FPKM gene expression data.
 #' @source \url{https://gdc-portal.nci.nih.gov/projects/TCGA-BRCA}
-"tissue"
-
-#' Gene expression for all tissue samples.
-#'
-#' Matrix with all samples gene expression from RNASeq v2 FPKM (rows: genomic ranges) x (columns: patients)
-#'
-#' FPKM: fragments per kilobase per million
-#' = [# of fragments]/[length of transcript in kilo base]/[million mapped reads]
-#'
-#' @format A matrix with FPKM gene expression data.
-#' @source \url{https://gdc-portal.nci.nih.gov/projects/TCGA-BRCA}
-"tissue.all"
-
-#' Index of patients per tissue.
-#'
-#' A dataset containing a list of index tissue names from TCGA breast cancer dataset (BRCA).
-#'
-#' Each element has a vector of logical index for the tissue data.
-#'
-#' @source \url{https://gdc-portal.nci.nih.gov/projects/TCGA-BRCA}
-"tissue.ix"
+"fpkm.per.tissue"
 
 #' Patient's barcode per tissue type
 #'
 #' A dataset containing a list of vectors with TCGA barcodes per tissue type.
 #'
 #' @source \url{https://gdc-portal.nci.nih.gov/projects/TCGA-BRCA}
-"tissue.barcode"
+"fpkm.per.tissue.barcode"
 
 #' Clinical data per tissue type
 #'
@@ -45,7 +25,7 @@
 #' @source \url{https://gdc-portal.nci.nih.gov/projects/TCGA-BRCA}
 "clinical"
 
-#' Genomic ranges with description for genes in tissue[.all] matrices
+#' Genomic ranges with description for genes in tissue matrices
 #'
 #' Contains ensembl id and external gene names.
 #'
@@ -64,9 +44,14 @@
 
 #' Original data from GDC
 #'
+#' To get RNA-Seq assay data, please run loadGDCRnaSeq()
+#'
+#' It is not included in the data originaly to avoid redundant
+#'  data in the package.
+#'
 #' Contains:
 #' - All clinical data (clinical, follow-up, etc..)
-#' - Gene expression data
+#' - Gene expression metadata (assay can be obtained by function 'loadGDCRnaSeq')
 #' - Mutation data
 #'
 #' @source \url{https://gdc-portal.nci.nih.gov/projects/TCGA-BRCA}
