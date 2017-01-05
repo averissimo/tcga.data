@@ -32,7 +32,7 @@ knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
 # load library or use directly if insta
 install.packages('devtools')
 # The library can also be loaded and use the function install_git without 'devtools::' prefix
-devtools::install_git('http://sels.tecnico.ulisboa.pt/gitlab/averissimo/rpackage-brca.git')
+devtools::install_url('http://sels.tecnico.pt/gitlab/averissimo/rpackage-brca/repository/archive.zip')
 #
 # Load the brca.data package
 library(brca.data)
@@ -269,9 +269,20 @@ for (el in names(fpkm.per.tissue)) {
 ### Store patient's clinical data
 
 ```{r clinical}
+#
+# Add survival event time column
+survival.event.tmp <- clinical$all[, c('days_to_death', "days_to_last_followup", "days_to_last_known_alive", "vital_status")]
+#
+vital.status.ix <- !is.na(clinical$all$days_to_death)
+#
+clinical$all$surv_event_time[ vital.status.ix] <- clinical$all[ vital.status.ix,'days_to_death']
+clinical$all$surv_event_time[!vital.status.ix] <- clinical$all[!vital.status.ix,'days_to_last_followup']
+#
+#
 for (el in names(fpkm.per.tissue)) {
   clinical[[el]] <- clinical$all[fpkm.per.tissue.barcode[[el]],]
 }
+#
 sample.size <- c()
 for (el in names(clinical)) {
   sample.size <- rbind(sample.size, c(nrow(clinical[[el]]), ncol(clinical[[el]])))
