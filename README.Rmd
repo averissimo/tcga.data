@@ -196,9 +196,10 @@ rownames(fpkm.per.tissue$all) <- gdc$rnaseq@rowRanges$ensembl_gene_id
 gene.ranges <- gdc$rnaseq@rowRanges
 #
 # clinical data
+rownames(gdc$clinical) <- gdc$clinical$bcr_patient_barcode
+gdc$clinical <- gdc$clinical
 clinical <- list()
 clinical$all <- gdc$clinical
-rownames(gdc$clinical) <- gdc$clinical$bcr_patient_barcode
 ```
 
 ## Processing the data
@@ -279,8 +280,8 @@ clinical$all$surv_event_time[ vital.status.ix] <- clinical$all[ vital.status.ix,
 clinical$all$surv_event_time[!vital.status.ix] <- clinical$all[!vital.status.ix,'days_to_last_followup']
 #
 #
-for (el in names(fpkm.per.tissue)) {
-  clinical[[el]] <- clinical$all[fpkm.per.tissue.barcode[[el]],]
+for (el in names(fpkm.per.tissue)[names(fpkm.per.tissue) != 'all']) {
+  clinical[[el]] <- clinical$all[unique(fpkm.per.tissue.barcode[[el]]),]
 }
 #
 sample.size <- c()
