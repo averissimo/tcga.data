@@ -44,7 +44,7 @@ How to use the dataset
 # load library or use directly if insta
 install.packages('devtools')
 # The library can also be loaded and use the function install_git without 'devtools::' prefix
-devtools::install_git('http://sels.tecnico.ulisboa.pt/gitlab/averissimo/rpackage-brca.git')
+devtools::install_url('http://sels.tecnico.ulisboa.pt/gitlab/SOUND/brca.data/repository/archive.zip')
 #
 # Load the brca.data package
 library(brca.data)
