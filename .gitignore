@@ -5,3 +5,4 @@ GDCdata
 MANIFEST.txt
 *cache*.RData
 data/
+*.Rproj
