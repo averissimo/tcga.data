@@ -15,4 +15,3 @@ clinical
 A dataset containing a list of dataframes with clinical data per tissue type.
 }
 \keyword{datasets}
-

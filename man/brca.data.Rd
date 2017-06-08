@@ -17,4 +17,3 @@ To use this package load the following datasets:
 
 To see how the data was retrieved, check the `README.Rmd` in the package source.
 }
-

@@ -3,7 +3,7 @@
 \docType{data}
 \name{gene.ranges}
 \alias{gene.ranges}
-\title{Genomic ranges with description for genes in tissue[.all] matrices}
+\title{Genomic ranges with description for genes in tissue matrices}
 \format{An object of class \code{GRanges} of length 57251.}
 \source{
 \url{https://gdc-portal.nci.nih.gov/projects/TCGA-BRCA}
@@ -15,4 +15,3 @@ gene.ranges
 Contains ensembl id and external gene names.
 }
 \keyword{datasets}
-

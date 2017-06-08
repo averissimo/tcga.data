@@ -4,7 +4,7 @@
 \name{gdc}
 \alias{gdc}
 \title{Original data from GDC}
-\format{An object of class \code{list} of length 8.}
+\format{An object of class \code{list} of length 9.}
 \source{
 \url{https://gdc-portal.nci.nih.gov/projects/TCGA-BRCA}
 }
@@ -12,10 +12,15 @@
 gdc
 }
 \description{
+To get RNA-Seq assay data, please run loadGDCRnaSeq()
+}
+\details{
+It is not included in the data originaly to avoid redundant
+ data in the package.
+
 Contains:
 - All clinical data (clinical, follow-up, etc..)
-- Gene expression data
+- Gene expression metadata (assay can be obtained by function 'loadGDCRnaSeq')
 - Mutation data
 }
 \keyword{datasets}
-

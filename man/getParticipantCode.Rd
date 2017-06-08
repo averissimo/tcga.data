@@ -19,4 +19,3 @@ TCGA-XX-XXXX
 getParticipantCode('TCGA-3C-AAAU-01A-11R-A41B-07')
 getParticipantCode(c('TCGA-3C-AAAU-01A-11R-A41B-07', 'TCGA-3C-AALI-01A-11R-A41B-07'))
 }
-

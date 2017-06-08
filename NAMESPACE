@@ -2,3 +2,5 @@
 
 export(getParticipantCode)
 export(getSampleTypeCode)
+export(joinRNASeqData)
+export(loadGDCRnaSeq)
