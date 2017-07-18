@@ -109,7 +109,7 @@ Change `project` variable to get other data projects in TCGA.
 
 ```{r biolinks}
 library(TCGAbiolinks)
-project <- 'TCGA-BRCA'
+project <- 'TCGA-PRAD'
 cached.file <- file.path('..', 'tcga-biolinks-cache.RData')
 if (file.exists(cached.file)) {
   load(cached.file)
@@ -119,36 +119,37 @@ if (file.exists(cached.file)) {
   query$clinical <- GDCquery(project = project,
                              data.category = "Clinical")
   # Download query data
-  GDCdownload(query$clinical, method = 'api', directory = file.path('..', 'GDCdata'))
+  download.out <- GDCdownload(query$clinical, method = 'api', directory = file.path('..', 'GDCdata'))
+
   # Prepare R object with data
   gdc <- list()
-  gdc$clinical        <- GDCprepare_clinic(query$clinical, 'patient')
-  gdc$drug            <- GDCprepare_clinic(query$clinical, 'drug')
-  gdc$radiation       <- GDCprepare_clinic(query$clinical, 'radiation')
-  gdc$admin           <- GDCprepare_clinic(query$clinical, 'admin')
-  gdc$follow.up       <- GDCprepare_clinic(query$clinical, 'follow_up')
-  gdc$stage_event     <- GDCprepare_clinic(query$clinical, 'stage_event')
-  gdc$new_tumor_event <- GDCprepare_clinic(query$clinical, 'new_tumor_event')
+  gdc$clinical        <- GDCprepare_clinic(query$clinical, 'patient', directory = file.path('..', 'GDCdata'))
+  gdc$drug            <- GDCprepare_clinic(query$clinical, 'drug', directory = file.path('..', 'GDCdata'))
+  gdc$radiation       <- GDCprepare_clinic(query$clinical, 'radiation', directory = file.path('..', 'GDCdata'))
+  gdc$admin           <- GDCprepare_clinic(query$clinical, 'admin', directory = file.path('..', 'GDCdata'))
+  gdc$follow.up       <- GDCprepare_clinic(query$clinical, 'follow_up', directory = file.path('..', 'GDCdata'))
+  gdc$stage_event     <- GDCprepare_clinic(query$clinical, 'stage_event', directory = file.path('..', 'GDCdata'))
+  gdc$new_tumor_event <- GDCprepare_clinic(query$clinical, 'new_tumor_event', directory = file.path('..', 'GDCdata'))
   #
   query$rnaseq <- GDCquery(project = project,
                            data.category = "Transcriptome Profiling",
                            data.type     = "Gene Expression Quantification",
                            workflow.type = "HTSeq - FPKM")
   #
-  GDCdownload(query$rnaseq, method = 'api', directory = file.path('..', 'GDCdata'))
-  gdc$rnaseq <- GDCprepare(query$rnaseq)
+  GDCdownload(query$rnaseq, method = 'api', directory = file.path('..', 'GDCdata'),
+              chunks.per.download = 50)
+  gdc$rnaseq <- GDCprepare(query$rnaseq, directory = file.path('..', 'GDCdata'))
   #
   query$mutation <- GDCquery(project = project,
                              data.category = "Simple Nucleotide Variation",
                              data.type     = "Masked Somatic Mutation",
                              workflow.type = "MuSE Variant Aggregation and Masking")
   GDCdownload(query$mutation, method = 'api', directory = file.path('..', 'GDCdata'))
-  gdc$mutation <- GDCprepare(query$mutation)
+  gdc$mutation <- GDCprepare(query$mutation, directory = file.path('..', 'GDCdata'))
   # clean up table by removing all rows that are NA
   gdc$mutation <- gdc$mutation[,colSums(is.na(gdc$mutation)) != nrow(gdc$mutation)]
   #
-  save(gdc, query,
-       file = cached.file)
+  save(gdc, query, file = cached.file)
 }
 ```
 
