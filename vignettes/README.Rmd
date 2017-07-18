@@ -109,7 +109,7 @@ Change `project` variable to get other data projects in TCGA.
 
 ```{r biolinks}
 library(TCGAbiolinks)
-project <- 'TCGA-PRAD'
+project <- 'TCGA-BRCA'
 cached.file <- file.path('..', 'tcga-biolinks-cache.RData')
 if (file.exists(cached.file)) {
   load(cached.file)
