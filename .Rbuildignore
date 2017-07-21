@@ -1,7 +1,10 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-backup/
-GDCdata
-survival.csv
 tcga-biolinks-cache.RData
-.git
+vignettes/GDCdata
+vignettes/MANIFEST.txt
+vignettes/Human_genes__GRCh38_p10_.rda
+backup/
+*.csv
+GDCdata
+
