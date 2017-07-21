@@ -125,7 +125,7 @@ Change `project` variable to get other data projects in TCGA.
 ```{r biolinks}
 library(TCGAbiolinks)
 project <- params$project
-cached.file <- file.path('..', 'tcga-biolinks-cache.RData')
+cached.file <- file.path('..', sprintf('tcga-biolinks-%s-cache.RData', tolower(my.project)))
 if (file.exists(cached.file)) {
   load(cached.file)
 } else {
