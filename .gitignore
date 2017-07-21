@@ -6,3 +6,4 @@ MANIFEST.txt
 *cache*.RData
 data/
 *.Rproj
+inst/doc

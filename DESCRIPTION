@@ -1,5 +1,5 @@
 Package: brca.data
-Title: BRCA gene expression and clinical data from TCGA (with import script)
+Title: Gene expression and clinical data from Breast cancer dataset from TCGA.
 Version: 1.0
 Authors@R: person("André", "Veríssimo", email = "andre.verissimo@tecnico.ulisboa.pt", role = c("aut", "cre"))
 Description: Contains the datasets for BRCA (breast cancer) with gene expression
@@ -11,5 +11,8 @@ Encoding: UTF-8
 LazyData: true
 Suggests:
     futile.logger,
-    TCGA2STAT
+    TCGAbiolinks,
+    knitr,
+    rmarkdown
 RoxygenNote: 6.0.1
+VignetteBuilder: knitr

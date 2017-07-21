@@ -1,0 +1,95 @@
+---
+title: "Distribution of Gene Expression"
+params:
+  samples: '100'
+output:
+  rmarkdown::html_vignette:
+    toc: yes
+  html_document:
+    toc: yes
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Libraries
+
+```{r libraries}
+devtools::load_all()
+library(ggplot2)
+library(reshape2)
+library(futile.logger)
+```
+
+
+# Data generation
+
+- remove genes with `standard deviation == 0`
+- choose 100 random genes (defined by `samples` options in the Rmd header)
+
+```{r data}
+# data
+data("fpkm.per.tissue")
+
+# simple transpose
+rna.seq <- t(fpkm.per.tissue$primary.solid.tumor)
+
+# find index with sd == 0 and remove them
+rna.seq.sd <- sapply(seq(ncol(rna.seq)), function(e){
+  sd(rna.seq[,e])
+})
+rna.seq <- rna.seq[,rna.seq.sd != 0]
+
+# find index with sd == 0 and remove them
+rna.seq.3q <- sapply(seq(ncol(rna.seq)), function(e){
+  quantile(rna.seq[,e], .75)
+})
+rna.seq <- rna.seq[,rna.seq.3q != 0]
+
+# take a sample of 100 genes
+samples <- params$samples
+rna.seq <- rna.seq[,sample(ncol(rna.seq), samples)]
+
+# functions for log and log2
+log.fun  <- function(arg) { log(1 + arg) }
+log2.fun <- function(arg) { log2(1 + arg) }
+
+```
+
+# Plot the results
+
+```{r results, echo=FALSE}
+
+# actual display the results
+for (my.name in colnames(rna.seq)) {
+  #
+  my.rna.seq <- rna.seq[, my.name]
+  #
+  my.rna.seq.df <- data.frame(id         = names(my.rna.seq), 
+                              value      = my.rna.seq, 
+                              log.value  = log.fun(my.rna.seq), 
+                              log2.value = log2.fun(my.rna.seq))
+  #
+  rna.seq.df <- melt(my.rna.seq.df, 'id', c('value', 'log.value', 'log2.value'))
+  #
+  binwidth <- sd(my.rna.seq) / 30
+  g <- ggplot(data = rna.seq.df) + theme_minimal() +
+    geom_freqpoly(aes(value, color = variable), binwidth = binwidth)+ facet_grid(variable ~ .) + 
+    ggtitle(sprintf('Distribution of %s', my.name))
+  #
+  flog.info('Summary of original value', summary(my.rna.seq.df$value), capture = T)
+  flog.info('\n')
+  flog.info('Summary of log', summary(my.rna.seq.df$log.value), capture = T)
+  flog.info('\n')
+  flog.info('Summary of log2', summary(my.rna.seq.df$log2.value), capture = T)
+  flog.info('\n')
+  print(g)
+}
+```
+
+

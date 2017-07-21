@@ -1,10 +1,9 @@
 ^.*\.Rproj$
 ^\.Rproj\.user$
-tcga-biolinks-cache.RData
+tcga-biolinks-cache\.RData
 vignettes/GDCdata
-vignettes/MANIFEST.txt
-vignettes/Human_genes__GRCh38_p10_.rda
+vignettes/MANIFEST\.txt
+vignettes/Human_genes__GRCh38_p10_\.rda
 backup/
-*.csv
 GDCdata
-
+^.*\.csv
