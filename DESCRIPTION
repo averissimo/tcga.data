@@ -1,6 +1,6 @@
 Package: brca.data
 Title: Gene expression and clinical data from Breast cancer dataset from TCGA.
-Version: 1.0
+Version: 2017.07.21
 Authors@R: person("André", "Veríssimo", email = "andre.verissimo@tecnico.ulisboa.pt", role = c("aut", "cre"))
 Description: Contains the datasets for BRCA (breast cancer) with gene expression
     and clinical data. All was extracted from TCGA.
