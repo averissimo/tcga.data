@@ -4,13 +4,13 @@ André Veríssimo *and* Marta Lopes
 
 updated July 2017
 
--   [Package information](#package-information)
-    -   [How to use the dataset](#how-to-use-the-dataset)
-        -   [Example](#example)
-    -   [Description of the data set](#description-of-the-data-set)
-        -   [Explaining the TCGA codes](#explaining-the-tcga-codes)
--   [Acknowledgements](#acknowledgements)
-    -    [Funding](#funding)
+- [Package information](#package-information)
+  - [How to use the dataset](#how-to-use-the-dataset)
+    - [Example](#example)
+  - [Description of the data set](#description-of-the-data-set)
+    - [Explaining the TCGA codes](#explaining-the-tcga-codes)
+- [Acknowledgements](#acknowledgements)
+  - [Funding](#funding)
 
 
 # Package information
@@ -25,19 +25,19 @@ The data is publicly available (<https://gdc-portal.nci.nih.gov/>).
 
 ## How to use the dataset
 
-1.  Download a released package (brca.data or tcga.data)
+1. Download a released package (brca.data or tcga.data)
 
-2.  Install it using `install.packages('<path to package>', repos = NULL, type="source")`
-    -   Alternatively use the link directly with devtools package `devtools::install_url('<link to package zip>')`
+1. Install it using `install.packages('<path to package>', repos = NULL, type="source")`
+    - Alternatively use the link directly with devtools package `devtools::install_url('<link to package zip>')`
 
-3.  Load the library
+1. Load the library
 
-4.  Load the required datasets (one or more of the following)
-    -   `clinical`
-    -   `fpkm.per.tissue`
-    -   `fpkm.per.tissue.barcode`
-    -   `mutation`
-    -   `gdc`
+1. Load the required datasets (one or more of the following)
+    - `clinical`
+    - `fpkm.per.tissue`
+    - `fpkm.per.tissue.barcode`
+    - `mutation`
+    - `gdc`
 
 ### Example using the direct link
 
@@ -62,17 +62,17 @@ The Cancer Genome Atlas data collection is part of a larger effort to build a re
 
 The data is publicly available (<https://gdc-portal.nci.nih.gov/>) and this package only has available the following data:
 
-1.  the gene expression data, decomposed on the origin of the sample (i.e. normal tissue, primary solid tumor, etc..);
+1. gene expression data, decomposed on the origin of the sample (i.e. normal tissue, primary solid tumor, etc..);
 
-2.  the clinical data also decomposed in the same way as gene expression data. (additional information is also available in the gdc data variable, such as follow\_up, drug, radiation, ...);
+1. clinical data also decomposed in the same way as gene expression data. (additional information is also available in the gdc data variable, such as follow\_up, drug, radiation, ...);
 
-3.  mutation information presented in a sparse matrix with the count of mutations per patient/ensemble gene.
+1. mutation information presented in a sparse matrix with the count of mutations per patient/ensemble gene.
 
 ### Explaining the TCGA codes
 
 The following links explain (1) the individuals' barcode and (2) the sample type code:
 
-1.  [Link to individuals' barcode from tcga](https://wiki.nci.nih.gov/display/TCGA/TCGA+barcode?desktop=true&macroName=unmigrated-inline-wiki-markup)
+1. [Link to individuals' barcode from tcga](https://wiki.nci.nih.gov/display/TCGA/TCGA+barcode?desktop=true&macroName=unmigrated-inline-wiki-markup)
 
 1. [Link to sample type code from tcga](https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables/sample-type-codes)
 
@@ -103,14 +103,14 @@ Susana Vinga for supervising and guidance of this work.
 
 ### Projects
 
--    EU H2020 Personalizing Health and Care Program - [https://ec.europa.eu/commission/](https://ec.europa.eu/commission/index_en)
-    -    **SOUND** – Statistical multi-Omics UNDerstanding of Patient Samples – Horizon 2020 - 633974 – [http://www.sound-biomed.eu/](http://www.sound-biomed.eu/)
+- EU H2020 Personalizing Health and Care Program - [https://ec.europa.eu/commission/](https://ec.europa.eu/commission/index_en)
+  - **SOUND** – Statistical multi-Omics UNDerstanding of Patient Samples – Horizon 2020 - 633974 – [http://www.sound-biomed.eu/](http://www.sound-biomed.eu/)
 
--    Fundação para a Ciência e Tecnologia (FCT) - [http://www.fct.pt/](http://www.fct.pt/)
-    -    **PERSEIDS** – Personalizing cancer therapy through integrated modeling and decision – FCT Project PTDC/EMS-SIS/0642/2014
+- Fundação para a Ciência e Tecnologia (FCT) - [http://www.fct.pt/](http://www.fct.pt/)
+  - **PERSEIDS** – Personalizing cancer therapy through integrated modeling and decision – FCT Project PTDC/EMS-SIS/0642/2014
 
 ### Fellowships
 
--    **Fundação para a Ciência e Tecnologia (FCT)** - [http://www.fct.pt/](http://www.fct.pt/)
-    -    André Veríssimo's PhD grant - SFRH/BD/97415/2013
-    -    Susana Vinga' Investigador FCT grant - IF/00653/2012
+- **Fundação para a Ciência e Tecnologia (FCT)** - [http://www.fct.pt/](http://www.fct.pt/)
+  - André Veríssimo's PhD grant - SFRH/BD/97415/2013
+  - Susana Vinga' Investigador FCT grant - IF/00653/2012
