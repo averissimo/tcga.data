@@ -98,7 +98,7 @@ Explanation of TCGA barcode using example `TCGA-02-0001-01C-01D-0182-01`
 
 The BRCA data set can also be extracted through the [TCGAbiolinks R bioconductor package](https://bioconductor.org/packages/release/bioc/html/TCGAbiolinks.html)
 
-```{r install_biolinks, eval = FALSE}
+```{r install_biolinks, eval=FALSE}
 source("https://bioconductor.org/biocLite.R")
 biocLite("TCGAbiolinks")
 ```
@@ -107,9 +107,10 @@ biocLite("TCGAbiolinks")
 
 Change `project` variable to get other data projects in TCGA.
 
+
 ```{r biolinks}
 library(TCGAbiolinks)
-project <- 'TCGA-BRCA'
+project <- 'TCGA-PRAD'
 cached.file <- file.path('..', 'tcga-biolinks-cache.RData')
 if (file.exists(cached.file)) {
   load(cached.file)
@@ -119,37 +120,37 @@ if (file.exists(cached.file)) {
   query$clinical <- GDCquery(project = project,
                              data.category = "Clinical")
   # Download query data
-  download.out <- GDCdownload(query$clinical, method = 'api', directory = file.path('..', 'GDCdata'))
+  download.out <- GDCdownload(query$clinical, method = 'api')
 
   # Prepare R object with data
   gdc <- list()
-  gdc$clinical        <- GDCprepare_clinic(query$clinical, 'patient', directory = file.path('..', 'GDCdata'))
-  gdc$drug            <- GDCprepare_clinic(query$clinical, 'drug', directory = file.path('..', 'GDCdata'))
-  gdc$radiation       <- GDCprepare_clinic(query$clinical, 'radiation', directory = file.path('..', 'GDCdata'))
-  gdc$admin           <- GDCprepare_clinic(query$clinical, 'admin', directory = file.path('..', 'GDCdata'))
-  gdc$follow.up       <- GDCprepare_clinic(query$clinical, 'follow_up', directory = file.path('..', 'GDCdata'))
-  gdc$stage_event     <- GDCprepare_clinic(query$clinical, 'stage_event', directory = file.path('..', 'GDCdata'))
-  gdc$new_tumor_event <- GDCprepare_clinic(query$clinical, 'new_tumor_event', directory = file.path('..', 'GDCdata'))
+  gdc$clinical        <- GDCprepare_clinic(query$clinical, 'patient')
+  gdc$drug            <- GDCprepare_clinic(query$clinical, 'drug')
+  gdc$radiation       <- GDCprepare_clinic(query$clinical, 'radiation')
+  gdc$admin           <- GDCprepare_clinic(query$clinical, 'admin')
+  gdc$follow.up       <- GDCprepare_clinic(query$clinical, 'follow_up')
+  gdc$stage_event     <- GDCprepare_clinic(query$clinical, 'stage_event')
+  gdc$new_tumor_event <- GDCprepare_clinic(query$clinical, 'new_tumor_event')
   #
   query$rnaseq <- GDCquery(project = project,
                            data.category = "Transcriptome Profiling",
                            data.type     = "Gene Expression Quantification",
                            workflow.type = "HTSeq - FPKM")
   #
-  GDCdownload(query$rnaseq, method = 'api', directory = file.path('..', 'GDCdata'),
-              chunks.per.download = 50)
-  gdc$rnaseq <- GDCprepare(query$rnaseq, directory = file.path('..', 'GDCdata'))
+  GDCdownload(query$rnaseq, method = 'api', chunks.per.download = 6)
+  gdc$rnaseq <- GDCprepare(query$rnaseq)
   #
   query$mutation <- GDCquery(project = project,
                              data.category = "Simple Nucleotide Variation",
                              data.type     = "Masked Somatic Mutation",
                              workflow.type = "MuSE Variant Aggregation and Masking")
-  GDCdownload(query$mutation, method = 'api', directory = file.path('..', 'GDCdata'))
-  gdc$mutation <- GDCprepare(query$mutation, directory = file.path('..', 'GDCdata'))
+  GDCdownload(query$mutation, method = 'api', chunks.per.download = 6)
+  gdc$mutation <- GDCprepare(query$mutation)
   # clean up table by removing all rows that are NA
   gdc$mutation <- gdc$mutation[,colSums(is.na(gdc$mutation)) != nrow(gdc$mutation)]
   #
-  save(gdc, query, file = cached.file)
+  save(gdc, query,
+       file = cached.file)
 }
 ```
 
@@ -165,11 +166,11 @@ library(Matrix)
 #
 # this is distributed as part of the package
 getParticipant <- function(fullBarcode) {
-  source('R/functions.R')
+  source('../R/functions.R')
   getParticipantCode(fullBarcode)
 }
 getSample <- function(fullBarcode) {
-  source('R/functions.R')
+  source('../R/functions.R')
   getSampleTypeCode(fullBarcode)
 }
 ```
@@ -243,8 +244,11 @@ tissue.mapping <- list(
 tissue.ix <- list()
 for (el in names(tissue.mapping)) {
   tissue.ix[[el]] <- (tissue.type == tissue.mapping[[el]])
-  if (any(tissue.ix[[el]]))
-    fpkm.per.tissue[[el]] <- fpkm.per.tissue$all[,tissue.ix[[el]]]
+  if (any(tissue.ix[[el]])) {
+    fpkm.per.tissue[[el]] <- as.matrix(fpkm.per.tissue$all[,tissue.ix[[el]]])
+    colnames(fpkm.per.tissue[[el]]) <- colnames(fpkm.per.tissue$all)[tissue.ix[[el]]]
+    rownames(fpkm.per.tissue[[el]]) <- rownames(fpkm.per.tissue$all)
+  }
 }
 ```
 
@@ -273,7 +277,7 @@ for (el in names(fpkm.per.tissue)) {
 ```{r clinical}
 #
 # Add survival event time column
-survival.event.tmp <- clinical$all[, c('days_to_death', "days_to_last_followup", "days_to_last_known_alive", "vital_status")]
+survival.event.tmp <- clinical$all[, c('days_to_death', "days_to_last_followup", "vital_status")]
 #
 vital.status.ix <- !is.na(clinical$all$days_to_death)
 #
@@ -302,8 +306,9 @@ futile.logger::flog.info('Clinical information per tissue type:', sample.size, c
 mutations <- matrix(0, ncol = nrow(gdc$clinical), nrow = length(gdc$mutation$Gene), dimnames = list(gdc$mutation$Gene, gdc$clinical$bcr_patient_barcode))
 # get a temporary index list for fast access
 ix.list <- cbind(gdc$mutation$Gene, getParticipant(gdc$mutation$Tumor_Sample_Barcode))
+ix.list <- ix.list[!is.na(gdc$mutation$Gene),]
 # this is a long run, should be as simple as possible
-for(ix in seq(length(gdc$mutation$Gene))) {
+for(ix in seq(nrow(ix.list))) {
   mutations[ix.list[ix,1], ix.list[ix,2]] <- mutations[ix.list[ix,1], ix.list[ix,2]] + 1
 }
 ```
@@ -347,11 +352,12 @@ uniq.id  <- paste0(test.mat$Hugo_Symbol, getParticipantCode(test.mat$Tumor_Sampl
 test.mat <- test.mat[duplicated(uniq.id) | duplicated(uniq.id, fromLast = TRUE),]
 # Sort by Hugo_Symbol to have the same gene in consecutive lines
 test.mat <- arrange(test.mat, Hugo_Symbol, barcode = getParticipantCode(test.mat$Tumor_Sample_Barcode))
-# Chose randomly
+# Chosen randomly in brca
 # A2ML1 <- same type of mutation on the same gene
 # AAK1  <- two types of variant on different positions on the same gene
 # AC097711.1 and CEP128 <- Two different types of samples (tumour / metastases)
-gene.test.list <- c('AAK1', 'A2ML1', 'AC097711.1')
+#gene.test.list <- c('AAK1', 'A2ML1', 'AC097711.1')
+gene.test.list <- sample(unique(test.mat$Hugo_Symbol), 5)
 diff.columns <- array(FALSE, ncol(test.mat))
 # add some important ones
 diff.columns[c(1,5,6,7,8,9)] <- TRUE
@@ -398,8 +404,9 @@ mutation$count <- matrix(integer(1), ncol = nrow(gdc$clinical), nrow = length(mu
                          dimnames = list(mutation$data$Gene, gdc$clinical$bcr_patient_barcode))
 # get a temporary index list for fast access
 ix.list <- cbind(mutation$data$Gene, getParticipant(mutation$data$Tumor_Sample_Barcode))
+ix.list <- ix.list[!is.na(mutation$data$Gene),]
 # this is a long run, should be as simple as possible
-for(ix in seq(length(mutation$data$Gene))) {
+for(ix in seq(nrow(ix.list))) {
   mutation$count[ix.list[ix,1], ix.list[ix,2]] <- mutation$count[ix.list[ix,1], ix.list[ix,2]] + 1
 }
 mutation$count <- Matrix(mutation$count, sparse = TRUE)
