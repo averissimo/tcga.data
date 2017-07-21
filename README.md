@@ -15,6 +15,10 @@ updated July 2017
 
 # Package information
 
+This R package family contains transcriptomic, clinical and mutation data from cancer studies. It is retrieved from TCGA and allows users to use the data directly in the form of matrices.
+
+The official releases are snapshots at the version's date.
+
 The Cancer Genome Atlas data collection is part of a larger effort to build a research community focused on connecting cancer phenotypes to genotypes by providing clinical images matched to subjects from The Cancer Genome Atlas ([TCGA](https://cancergenome.nih.gov/)).
 
 The data is publicly available (<https://gdc-portal.nci.nih.gov/>).
