@@ -12,7 +12,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 params:
-  project: "TCGA-BRCA"
+  project: "TCGA-SKCM"
 ---
 
 ```{r setup, include=FALSE}
@@ -20,7 +20,8 @@ knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
 ```
 
 ```{r subproject, include=FALSE}
-my.project <- gsub('TCGA-', '', params$project)
+my.project   <- gsub('TCGA-', '', params$project)
+package.name <- paste0(tolower(my.project), '.data')
 ```
 
 
@@ -49,7 +50,7 @@ install.packages('devtools')
 devtools::install_url('http://sels.tecnico.ulisboa.pt/gitlab/SOUND/brca.data/repository/archive.zip')
 #
 # Load the brca.data package
-library(brca.data)
+library(skcm.data)
 # start using the data, for example the tissue data
 data(fpkm.per.tissue)
 # tissue is now in the enviromnet and will be loaded on the first
