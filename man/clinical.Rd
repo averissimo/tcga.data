@@ -4,7 +4,7 @@
 \name{clinical}
 \alias{clinical}
 \title{Clinical data per tissue type}
-\format{An object of class \code{list} of length 4.}
+\format{An object of class \code{list} of length 5.}
 \source{
 \url{https://gdc-portal.nci.nih.gov/projects/TCGA-BRCA}
 }

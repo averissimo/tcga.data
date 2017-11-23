@@ -4,7 +4,7 @@
 \name{fpkm.per.tissue.barcode}
 \alias{fpkm.per.tissue.barcode}
 \title{Patient's barcode per tissue type}
-\format{An object of class \code{list} of length 4.}
+\format{An object of class \code{list} of length 5.}
 \source{
 \url{https://gdc-portal.nci.nih.gov/projects/TCGA-BRCA}
 }
