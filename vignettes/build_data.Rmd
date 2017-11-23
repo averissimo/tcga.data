@@ -152,14 +152,14 @@ if (file.exists(cached.file)) {
                            data.type     = "Gene Expression Quantification",
                            workflow.type = "HTSeq - FPKM")
   #
-  GDCdownload(query$rnaseq, method = 'api', chunks.per.download = 6)
+  GDCdownload(query$rnaseq, method = 'api', files.per.chunk = 6)
   gdc$rnaseq <- GDCprepare(query$rnaseq)
   #
   query$mutation <- GDCquery(project = project,
                              data.category = "Simple Nucleotide Variation",
                              data.type     = "Masked Somatic Mutation",
                              workflow.type = "MuSE Variant Aggregation and Masking")
-  GDCdownload(query$mutation, method = 'api', chunks.per.download = 6)
+  GDCdownload(query$mutation, method = 'api', files.per.chunk = 6)
   gdc$mutation <- GDCprepare(query$mutation)
   # clean up table by removing all rows that are NA
   gdc$mutation <- gdc$mutation[,colSums(is.na(gdc$mutation)) != nrow(gdc$mutation)]
@@ -315,89 +315,6 @@ futile.logger::flog.info('Clinical information per tissue type:', sample.size, c
 
 ### Mutations
 
-```{r mutations}
-#
-# Somatic mutations data
-mutations <- matrix(0, ncol = nrow(gdc$clinical), nrow = length(gdc$mutation$Gene), dimnames = list(gdc$mutation$Gene, gdc$clinical$bcr_patient_barcode))
-# get a temporary index list for fast access
-ix.list <- cbind(gdc$mutation$Gene, getParticipant(gdc$mutation$Tumor_Sample_Barcode))
-ix.list <- ix.list[!is.na(gdc$mutation$Gene),]
-# this is a long run, should be as simple as possible
-for(ix in seq(nrow(ix.list))) {
-  mutations[ix.list[ix,1], ix.list[ix,2]] <- mutations[ix.list[ix,1], ix.list[ix,2]] + 1
-}
-```
-#### Analysis of Raw Mutation Results
-
-```{r mutation_hist}
-# analyse raw mutation results
-mutations.by.case <- data.frame(ix = seq(ncol(mutations)), case = colSums(mutations), unique = colSums(mutations != 0))
-mutations.by.case$rel.unique.case <- mutations.by.case$case / mutations.by.case$unique
-#
-flog.info('Summary of count of mutations (with repeated)', summary(mutations.by.case$case), capture = TRUE)
-flog.info('Summary of count of mutations (unique only)', summary(mutations.by.case$unique), capture = TRUE)
-#
-ggplot(data = mutations.by.case) + 
-  theme_minimal() +
-  geom_point(data = base::subset(mutations.by.case, rel.unique.case <= 1.2), aes(x = ix, y = unique, colour = rel.unique.case)) + 
-  geom_point(data = base::subset(mutations.by.case, rel.unique.case > 1.2),  aes(x = ix, y = unique, colour = rel.unique.case)) + 
-  geom_point(data = base::subset(mutations.by.case, rel.unique.case > 1.4),  aes(x = ix, y = unique, colour = rel.unique.case)) + 
-  geom_point(data = base::subset(mutations.by.case, rel.unique.case > 1.6),  aes(x = ix, y = unique, colour = rel.unique.case)) + 
-  geom_point(data = base::subset(mutations.by.case, rel.unique.case > 1.8),  aes(x = ix, y = unique, colour = rel.unique.case)) + 
-  scale_colour_gradient('Sum/Unique (per case)', high = 'red', low = 'green') +
-  labs(title="Histogram for Mutations by Case") +
-  labs(x="Age", y="Unique count of mutations")
-```
-
-Other than duplicates identified from different samples, all other mutations seem to be on different positions of the same gene.
-
-Therefore, they will be counted!
-
-```{r}
-# Filter out cases that have unique mutations
-my.dup <- mutations.by.case[mutations.by.case$case != mutations.by.case$unique,]
-# Sort by descending order of cases that have biggest difference between mutations and unique count
-my.dup <- my.dup[sort(my.dup$case / my.dup$unique, index.return = TRUE, decreasing = TRUE)$ix,]
-# Look at top case!
-test.case <- rownames(my.dup)
-# Get the GDC rows that map to the top case
-test.mat <- gdc$mutation[getParticipantCode(gdc$mutation$Tumor_Sample_Barcode) %in% test.case,]
-# Choose only genes that are duplicated
-uniq.id  <- paste0(test.mat$Hugo_Symbol, getParticipantCode(test.mat$Tumor_Sample_Barcode))
-test.mat <- test.mat[duplicated(uniq.id) | duplicated(uniq.id, fromLast = TRUE),]
-# Sort by Hugo_Symbol to have the same gene in consecutive lines
-test.mat <- arrange(test.mat, Hugo_Symbol, barcode = getParticipantCode(test.mat$Tumor_Sample_Barcode))
-# Chosen randomly in brca
-# A2ML1 <- same type of mutation on the same gene
-# AAK1  <- two types of variant on different positions on the same gene
-# AC097711.1 and CEP128 <- Two different types of samples (tumour / metastases)
-#gene.test.list <- c('AAK1', 'A2ML1', 'AC097711.1')
-gene.test.list <- sample(unique(test.mat$Hugo_Symbol), 5)
-diff.columns <- array(FALSE, ncol(test.mat))
-# add some important ones
-diff.columns[c(1,5,6,7,8,9)] <- TRUE
-for (gene.test in gene.test.list) {
-  my.case <- test.mat[test.mat$Hugo_Symbol == gene.test,]
-  for (ix in 2:nrow(my.case)) {
-    diff.columns = diff.columns | as.vector(my.case[ix - 1,] != my.case[ix,])
-  }
-  diff.columns[is.na(diff.columns)] <- FALSE
-}
-my.analysis <- test.mat[test.mat$Hugo_Symbol %in% gene.test.list,diff.columns]
-# Only a subset of columns are displayed
-my.analysis
-```
-
-Cases to ignore:
-
-- From case `A2ML1` we found multiple mutations on different postition on the same gene
-- From case `AAK1` two types of variant on different positions on the same gene
-
-Cases to remove duplicates:
-
-- From case `CEP128` and `AC097711.1` we found that there are duplicates from different samples per individual (Tumour and Metastases), which we will discard one.
-
-
 ```{r discard_dups_in_same_position}
 mutation <- list()
 # remove duplicate mutations on same position
@@ -415,16 +332,41 @@ mutation$dups <- dplyr::arrange(mutation$dups, Hugo_Symbol, Tumor_Sample_Barcode
 #### Recalculate Mutations count of (row: gene) x (col: case)
 
 ```{r calc_mutations_count}
-mutation$count <- matrix(integer(1), ncol = nrow(gdc$clinical), nrow = length(mutation$data$Gene), 
-                         dimnames = list(mutation$data$Gene, gdc$clinical$bcr_patient_barcode))
+mutation$count <- matrix(integer(1), ncol = nrow(gdc$clinical), nrow = length(unique(mutation$data$Gene)), 
+                         dimnames = list(unique(mutation$data$Gene), gdc$clinical$bcr_patient_barcode))
 # get a temporary index list for fast access
 ix.list <- cbind(mutation$data$Gene, getParticipant(mutation$data$Tumor_Sample_Barcode))
 ix.list <- ix.list[!is.na(mutation$data$Gene),]
+ix.list <- as.tibble(ix.list, stringsAsFactors = FALSE)
+colnames(ix.list) <- c('gene', 'patient')
 # this is a long run, should be as simple as possible
-for(ix in seq(nrow(ix.list))) {
-  mutation$count[ix.list[ix,1], ix.list[ix,2]] <- mutation$count[ix.list[ix,1], ix.list[ix,2]] + 1
+sum.list <- ix.list %>% group_by(gene, patient) %>% summarise(n = n())
+for(ix in seq(nrow(sum.list))) {
+  mutation$count[sum.list[[ix,'gene']], sum.list[[ix,'patient']]] <- sum.list[[ix,'n']]
 }
-mutation$count <- Matrix(mutation$count, sparse = TRUE)
+mutation$count <- Matrix::Matrix(mutation$count, sparse = TRUE)
+```
+
+```{r mutation_hist}
+# analyse raw mutation results
+mutations.by.case <- data.frame(ix = seq(ncol(mutation$count)), case = colSums(mutation$count), unique = colSums(mutation$count != 0))
+mutations.by.case$rel.unique.case <- mutations.by.case$unique / mutations.by.case$case
+#
+flog.info('Summary of count of mutations (with repeated)', summary(mutations.by.case$case), capture = TRUE)
+flog.info('Summary of count of mutations (unique only)', summary(mutations.by.case$unique), capture = TRUE)
+#
+ggplot(data = mutations.by.case) + 
+  theme_minimal() +
+  geom_point(data = base::subset(mutations.by.case, rel.unique.case <= 1.2), aes(x = ix, y = unique, colour = rel.unique.case)) + 
+  geom_point(data = base::subset(mutations.by.case, rel.unique.case > 1.2),  aes(x = ix, y = unique, colour = rel.unique.case)) + 
+  geom_point(data = base::subset(mutations.by.case, rel.unique.case > 1.4),  aes(x = ix, y = unique, colour = rel.unique.case)) + 
+  geom_point(data = base::subset(mutations.by.case, rel.unique.case > 1.6),  aes(x = ix, y = unique, colour = rel.unique.case)) + 
+  geom_point(data = base::subset(mutations.by.case, rel.unique.case > 1.8),  aes(x = ix, y = unique, colour = rel.unique.case)) + 
+  scale_colour_gradient('% of unique mutations per gene', high = 'red', low = 'green') +
+  labs(title="Histogram for Mutations by Case") +
+  labs(x='Individual', y="Count of (unique) mutations") +
+  theme(legend.position = 'top') +
+  scale_y_continuous(breaks = c(1, 10, 100, 1000, 10000), trans = 'log10')
 ```
 
 ## Exported data
@@ -451,6 +393,6 @@ devtools::use_data(mutation,                overwrite = TRUE)
 ```
 
 ```{r, include=FALSE, eval=FALSE}
-rmarkdown::render('build_data.Rmd', out.dir = '.')
+rmarkdown::render('build_data.Rmd', output_file = 'README.md', output_dir = '..')
 ```
 
