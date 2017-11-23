@@ -1,9 +1,18 @@
-TCGA.DATA R Package
-================
+---
+title: "TCGA.DATA R Package"
+output:
+  github_document:
+    toc: true
+---
 
--   [Package information](#package-information)
-    -   [How to use the dataset](#how-to-use-the-dataset)
--   [Ackowledgements](#ackowledgements)
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, echo=FALSE, eval=FALSE}
+rmarkdown::render('README.Rmd', output_dir = '..')
+```
+
 
 This R Package allows to retrieve Gene Expression, Mutation and clinical data from [TCGA database](http://gdc-portal.nci.nih.gov/) (The Cancer Genome Atlas). It retrieves a single type of cancer at a time.
 
@@ -11,25 +20,24 @@ We publish diferent package in the [releases page](https://github.com/averissimo
 
 The genome expression datasets are already in a matrix format ready to be used. The data is in FPKM (Fragments Per Kilobase Million) format. Any additional normalization to use in models must be performed
 
-Package information
--------------------
+## Package information
 
 ### How to use the dataset
 
-1.  Install `brca.data` by using `devtools` package. (`brca.data`, `prad.data` or `skcm.data`)
+1. Install `brca.data` by using `devtools` package. (`brca.data`, `prad.data` or `skcm.data`)
 
-2.  Load the library
+1. Load the library
 
-3.  Load the required datasets (one or more of the following)
-    -   `clinical`
-    -   `fpkm.per.tissue`
-    -   `fpkm.per.tissue.barcode`
-    -   `mutation`
-    -   `gdc`
+1. Load the required datasets (one or more of the following)
+    - `clinical`
+    - `fpkm.per.tissue`
+    - `fpkm.per.tissue.barcode`
+    - `mutation`
+    - `gdc`
 
 #### Example
 
-``` r
+```{r install_brca.data, eval=FALSE}
 # install the devtooks library
 install.packages('devtools')
 # The library can also be loaded and use the function install_git without 'devtools::' prefix
@@ -44,13 +52,13 @@ data(fpkm.per.tissue)
 names(fpkm.per.tissue)
 ```
 
-Ackowledgements
----------------
+## Ackowledgements
 
 This package was developed primarily by *[André Veríssimo](http://web.tecnico.ulisboa.pt/andre.verissimo/)* with support from *Marta Lopes* and *[Susana Vinga](http://web.tecnico.ulisboa.pt/susanavinga/)*
 
 This work was supported by:
 
--   [FCT](www.fct.pt), through IDMEC, under LAETA, projects *(UID/EMS/50022/2013)*;
--   Susana Vinga acknowledges support by program Investigador FCT *(IF/00653/2012)* from [FCT](www.fct.pt), co-funded by the European Social Fund *(ESF)* through the Operational Program Human Potential *(POPH)*;
--   André Veríssimo acknowledges support from [FCT](www.fct.pt) *(SFRH/BD/97415/2013)*.
+- [FCT](www.fct.pt), through IDMEC, under LAETA, projects *(UID/EMS/50022/2013)*;
+  - Susana Vinga acknowledges support by program
+ Investigador FCT *(IF/00653/2012)* from [FCT](www.fct.pt), co-funded by the European Social Fund *(ESF)* through the Operational Program Human Potential *(POPH)*;
+  - André Veríssimo acknowledges support from [FCT](www.fct.pt) *(SFRH/BD/97415/2013)*.
