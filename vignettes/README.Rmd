@@ -52,6 +52,17 @@ data(fpkm.per.tissue)
 names(fpkm.per.tissue)
 ```
 
+## How to build own data package
+
+1. Open vignettes/build_data.Rmd
+1. Change in the header of the Rmd *(beginning of the document)* the project param to the target TCGA project
+1. Open DESCRITION and change the name of the package to the desired name
+  * we use a convention of ####.data where #### is the tcga project name in lowercase
+1. Run the vignettes/build_data.Rmd to build the cache of the data
+1. Run `devtools::document()` to create documentation
+1. (Optional step) Run `devtools::build_vignettes()` to build additional documentation
+1. Run `devtools::build()` to build the actual package
+
 ## Ackowledgements
 
 This package was developed primarily by *[André Veríssimo](http://web.tecnico.ulisboa.pt/andre.verissimo/)* with support from *Marta Lopes* and *[Susana Vinga](http://web.tecnico.ulisboa.pt/susanavinga/)*

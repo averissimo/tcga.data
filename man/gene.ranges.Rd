@@ -4,7 +4,7 @@
 \name{gene.ranges}
 \alias{gene.ranges}
 \title{Genomic ranges with description for genes in tissue matrices}
-\format{An object of class \code{GRanges} of length 57251.}
+\format{An object of class \code{GRanges} of length 56963.}
 \source{
 \url{https://gdc-portal.nci.nih.gov/projects/TCGA-BRCA}
 }

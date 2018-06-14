@@ -1,4 +1,4 @@
-Package: brca.data
+Package: kirc.data
 Title: Gene expression and clinical data from Breast cancer dataset from TCGA.
 Version: 1.0
 Authors@R: person("André", "Veríssimo", email = "andre.verissimo@tecnico.ulisboa.pt", role = c("aut", "cre"))

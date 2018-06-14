@@ -3,6 +3,7 @@ TCGA.DATA R Package
 
 -   [Package information](#package-information)
     -   [How to use the dataset](#how-to-use-the-dataset)
+-   [How to build own data package](#how-to-build-own-data-package)
 -   [Ackowledgements](#ackowledgements)
 
 This R Package allows to retrieve Gene Expression, Mutation and clinical data from [TCGA database](http://gdc-portal.nci.nih.gov/) (The Cancer Genome Atlas). It retrieves a single type of cancer at a time.
@@ -43,6 +44,20 @@ data(fpkm.per.tissue)
 #  time it is used. For example:
 names(fpkm.per.tissue)
 ```
+
+How to build own data package
+-----------------------------
+
+1.  Open vignettes/build\_data.Rmd
+2.  Change in the header of the Rmd *(beginning of the document)* the project param to the target TCGA project
+3.  Open DESCRITION and change the name of the package to the desired name
+
+-   we use a convention of \#\#\#\#.data where \#\#\#\# is the tcga project name in lowercase
+
+1.  Run the vignettes/build\_data.Rmd to build the cache of the data
+2.  Run `devtools::document()` to create documentation
+3.  (Optional step) Run `devtools::build_vignettes()` to build additional documentation
+4.  Run `devtools::build()` to build the actual package
 
 Ackowledgements
 ---------------
