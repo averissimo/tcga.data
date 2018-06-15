@@ -35,7 +35,7 @@ The genome expression datasets are already in a matrix format ready to be used. 
     - `mutation`
     - `gdc`
 
-#### Example
+#### Example for BRCA package
 
 ```{r install_brca.data, eval=FALSE}
 # install the devtooks library
