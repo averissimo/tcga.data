@@ -46,7 +46,7 @@ my.project <- gsub('TCGA-', '', params$project)
 # load library or use directly if insta
 install.packages('devtools')
 # The library can also be loaded and use the function install_git without 'devtools::' prefix
-devtools::install_url('http://sels.tecnico.ulisboa.pt/gitlab/SOUND/brca.data/repository/archive.zip')
+devtools::install_url('<link to github release>')
 #
 # Load the kirc.data package
 library(kirc.data)
