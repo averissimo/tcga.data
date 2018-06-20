@@ -7,3 +7,7 @@ MANIFEST.txt
 data/
 *.Rproj
 inst/doc
+*.tar.gz
+vignettes/*.rda
+.build.timestamp
+*.csv
