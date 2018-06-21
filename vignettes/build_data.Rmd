@@ -33,16 +33,16 @@ knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
     - `mutation`
     - `gdc`
 
-### Example
+### Example (for BRCA)
 
 ```{r install_brca.data, eval=FALSE}
 # load library or use directly if insta
 install.packages('devtools')
 # The library can also be loaded and use the function install_git without 'devtools::' prefix
-devtools::install_url('<link to github release>')
+devtools::install_url('https://github.com/averissimo/tcga.data/releases/download/2016.12.15-brca/brca.data_1.0.tar.gz')
 #
-# Load the kirc.data package
-library(kirc.data)
+# Load the brca.data package
+library(brca.data)
 # start using the data, for example the tissue data
 data(fpkm.per.tissue)
 # tissue is now in the enviromnet and will be loaded on the first
