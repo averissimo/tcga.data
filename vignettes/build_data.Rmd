@@ -1,7 +1,6 @@
 ---
 title: "Import cancer dataset from TCGA"
-author: "André Veríssimo *and* Marta Lopes"
-date: "November 2016"
+author: "André Veríssimo"
 output:
   github_document:
     toc: yes
@@ -19,18 +18,11 @@ params:
 knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
 ```
 
-```{r subproject, include=FALSE}
-my.project   <- gsub('TCGA-', '', params$project)
-package.name <- paste0(tolower(my.project), '.data')
-```
-
-
-
 # Package information
 
 ## How to use the dataset
 
-1. Install `r my.project`.data by using `devtools` package.
+1. Install `r params$project`.data by using `devtools` package.
 
 1. Load the library
 
@@ -47,10 +39,10 @@ package.name <- paste0(tolower(my.project), '.data')
 # load library or use directly if insta
 install.packages('devtools')
 # The library can also be loaded and use the function install_git without 'devtools::' prefix
-devtools::install_url('http://sels.tecnico.ulisboa.pt/gitlab/SOUND/brca.data/repository/archive.zip')
+devtools::install_url('<link to github release>')
 #
-# Load the brca.data package
-library(skcm.data)
+# Load the kirc.data package
+library(kirc.data)
 # start using the data, for example the tissue data
 data(fpkm.per.tissue)
 # tissue is now in the enviromnet and will be loaded on the first
@@ -126,26 +118,41 @@ Change `project` variable to get other data projects in TCGA.
 ```{r biolinks}
 library(TCGAbiolinks)
 project <- params$project
-cached.file <- file.path('..', sprintf('tcga-biolinks-%s-cache.RData', tolower(my.project)))
+cached.file <- file.path('..', sprintf('tcga-biolinks-%s-cache.RData', tolower(gsub('TCGA-', '', params$project))))
 if (file.exists(cached.file)) {
   load(cached.file)
 } else {
   query <- list()
   # Query the GDC to obtain data
-  query$clinical <- GDCquery(project = project,
-                             data.category = "Clinical")
+  query$clinical <- GDCquery(project       = project,
+                             data.category = "Clinical",
+                             file.type     = "xml")
   # Download query data
-  download.out <- GDCdownload(query$clinical, method = 'api')
+  GDCdownload(query$clinical, method = 'api')
 
   # Prepare R object with data
   gdc <- list()
-  gdc$clinical        <- GDCprepare_clinic(query$clinical, 'patient')
-  gdc$drug            <- GDCprepare_clinic(query$clinical, 'drug')
-  gdc$radiation       <- GDCprepare_clinic(query$clinical, 'radiation')
-  gdc$admin           <- GDCprepare_clinic(query$clinical, 'admin')
-  gdc$follow.up       <- GDCprepare_clinic(query$clinical, 'follow_up')
-  gdc$stage_event     <- GDCprepare_clinic(query$clinical, 'stage_event')
-  gdc$new_tumor_event <- GDCprepare_clinic(query$clinical, 'new_tumor_event')
+  gdc$clinical        <- GDCprepare_clinic(query$clinical, clinical.info = 'patient')
+  gdc$drug            <- GDCprepare_clinic(query$clinical, clinical.info =  'drug')
+  gdc$radiation       <- GDCprepare_clinic(query$clinical, clinical.info =  'radiation')
+  gdc$admin           <- GDCprepare_clinic(query$clinical, clinical.info =  'admin')
+  gdc$follow.up       <- GDCprepare_clinic(query$clinical, clinical.info =  'follow_up')
+  gdc$stage_event     <- GDCprepare_clinic(query$clinical, clinical.info =  'stage_event')
+  gdc$new_tumor_event <- GDCprepare_clinic(query$clinical, clinical.info =  'new_tumor_event')
+  #
+  query$biospecimen <- GDCquery(project       = project,
+                             data.category = "Biospecimen",
+                             file.type     = "xml")
+  GDCdownload(query$biospecimen, method = 'api')
+  #
+  gdc$bio.protocol  <- GDCprepare_clinic(query$biospecimen, clinical.info = 'protocol')
+  gdc$bio.admin     <- GDCprepare_clinic(query$biospecimen, clinical.info = 'admin')
+  gdc$bio.aliquot   <- GDCprepare_clinic(query$biospecimen, clinical.info = 'aliquot')
+  gdc$bio.analyte   <- GDCprepare_clinic(query$biospecimen, clinical.info = 'analyte')
+  gdc$bio.patient   <- GDCprepare_clinic(query$biospecimen, clinical.info = 'bio_patient')
+  gdc$bio.sample    <- GDCprepare_clinic(query$biospecimen, clinical.info = 'sample')
+  gdc$bio.portion   <- GDCprepare_clinic(query$biospecimen, clinical.info = 'portion')
+  gdc$bio.slide     <- GDCprepare_clinic(query$biospecimen, clinical.info = 'slide')
   #
   query$rnaseq <- GDCquery(project = project,
                            data.category = "Transcriptome Profiling",
