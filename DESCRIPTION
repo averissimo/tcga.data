@@ -1,6 +1,6 @@
 Package: skcm.data
 Title: Gene expression and clinical data from Melanoma from TCGA.
-Version: 2017.11.20
+Version: 2018.06.20
 Authors@R: person("André", "Veríssimo", email = "andre.verissimo@tecnico.ulisboa.pt", role = c("aut", "cre"))
 Description: Contains the datasets for SKCM (Melanoma) with gene expression
     and clinical data. All was extracted from TCGA.
@@ -13,6 +13,9 @@ Suggests:
     futile.logger,
     TCGAbiolinks,
     knitr,
-    rmarkdown
+    rmarkdown,
+    Biobase,
+    SingleCellExperiment,
+    MultiAssayExperiment
 RoxygenNote: 6.0.1
 VignetteBuilder: knitr

@@ -42,18 +42,14 @@ getSampleTypeCode <- function(fullBarcode) {
 #'
 #' @return a matrix with gene expression levels and all tissue samples
 #' @export
-#'
-#' @examples
 joinRNASeqData <- function() {
   # load tissue data
   data(fpkm.per.tissue)
 
   # iterate on all and join in a single matrix
-  arrays.in.dat <- sapply(seq(length(tissue)), function(ix){ is.array(tissue[[ix]]) })
-
   out.dat <- c()
-  for ( ix in which(arrays.in.dat)) {
-    out.dat <- cbind(out.dat, tissue[[ix]])
+  for (ix in names(fpkm.per.tissue)) {
+    out.dat <- cbind(out.dat, fpkm.per.tissue[[ix]])
   }
   return(out.dat)
 }
@@ -63,20 +59,12 @@ joinRNASeqData <- function() {
 #' This cannot be cached in the package as it takes too much space and
 #'  would be redundant with fpkm.per.tissue data
 #'
-#' @param project
-#' @param workflow.type
-#'
-#' @return
+#' @return a full gdc
 #' @export
-#'
-#' @examples
 loadGDCRnaSeq <- function() {
   data(gdc)
 
   temp.dat <- joinRNASeqData()
-  rownames(temp.dat) <- rownames(gdc$rnaseq)
-  temp.dat <- temp.dat[,colnames(gdc$rnaseq)]
-
   gdc$rnaseq@assays[[1]] <- temp.dat
 
   return(gdc)

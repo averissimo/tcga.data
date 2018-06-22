@@ -6,8 +6,8 @@
 \usage{
 loadGDCRnaSeq()
 }
-\arguments{
-\item{workflow.type}{}
+\value{
+a full gdc
 }
 \description{
 This cannot be cached in the package as it takes too much space and

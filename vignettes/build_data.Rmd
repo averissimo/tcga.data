@@ -376,6 +376,19 @@ ggplot(data = mutations.by.case) +
   scale_y_continuous(breaks = c(1, 10, 100, 1000, 10000), trans = 'log10')
 ```
 
+## MultiAssayExperiment
+
+Builds a multiAssayExperiment with clinical, rnaseq and mutation count data
+
+```{r, eval=FALSE}
+source('../R/load_assay.R')
+multiAssay <- build.assay(clinical.custom = clinical$all, 
+                          gdc.custom = gdc, 
+                          mutation.custom = mutation$count,
+                          rnaseq.custom = fpkm.per.tissue$all)
+```
+
+
 ## Exported data
 
 - `fpkm.per.tissue`: gene expression data for all types of tissues, see `names(tissue)`;
@@ -383,7 +396,7 @@ ggplot(data = mutations.by.case) +
 - `clinical`: Clinical data per tissue type. Has the same structure as tissue.
 - `mutation`: Mutation data from GDC (filtered) and a matrix of counts.
 
-```{r export_data, include=FALSE}
+```{r export_data, include=FALSE, eval=FALSE}
 # Extract all expression data to a different variable to remove redundancy in `tissue`
 fpkm.per.tissue$all <- NULL
 gdc$rnaseq     <- 'Use function loadGDCRnaSeq to get the original assay'
@@ -397,6 +410,7 @@ devtools::use_data(fpkm.per.tissue.barcode, overwrite = TRUE)
 devtools::use_data(clinical,                overwrite = TRUE)
 devtools::use_data(gene.ranges,             overwrite = TRUE)
 devtools::use_data(mutation,                overwrite = TRUE)
+#devtools::use_data(multiAssay,              overwrite = TRUE)
 ```
 
 ```{r, include=FALSE, eval=FALSE}
