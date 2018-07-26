@@ -44,8 +44,8 @@ update.survival.from.followup <- function(clinical, follow.up) {
   
   # Replace empty vital status to NA
   levels(follow.up$vital_status) <- levels(follow.up$vital_status) %>% {replace(., . == '', NA)}
-  follow.up$vital_status %>% {(all(levels(.) %in% c('Alive', 'Dead')))}
-  
+  levels(clinical$vital_status)  <- levels(clinical$vital_status) %>% {replace(., . == '', NA)}
+
   #
   # Build up follow-up information
   f.up.short <- follow.up %>% 
@@ -103,7 +103,15 @@ update.survival.from.followup <- function(clinical, follow.up) {
            date_form_completion = as.Date(paste0(year_of_form_completion, 
                                                  month_of_form_completion, 
                                                  day_of_form_completion, collapse = ''),
-                                          format = '%Y%M%d'))
+                                          format = '%Y%M%d')) %>%
+    rowwise %>%
+    #
+    # Keep only highest value from days to death/follow-up
+    mutate(surv_event_time = suppressWarnings(max(days_to_death, days_to_last_followup, na.rm = TRUE))) %>%
+    #
+    # Replace infinite values by NA (these come from max(NA) = -Inf)
+    mutate(surv_event_time = replace(surv_event_time, is.infinite(surv_event_time), NA))
+    
   
   #
   # Merge two tables
@@ -142,5 +150,9 @@ update.survival.from.followup <- function(clinical, follow.up) {
     # sort by patient barcode
     arrange(bcr_patient_barcode)
    
+  clinical.new$vital_status <- factor(clinical.new$vital_status, 
+                                      levels = c(0, 1), 
+                                      labels = c('Alive', 'Dead'))
+  
   return(clinical.new)
 }
