@@ -16,16 +16,28 @@
 #' library(dplyr)
 #' data(clinical, gdc, package = 'skcm.data')
 #' clinical.new <- update.survival.from.followup(clinical$all, gdc$follow.up)
-#' clinical.new
-#' clinical.new %>% filter(bcr_patient_barcode %in% c('TCGA-FR-A726', 'TCGA-D3-A8GP', 'TCGA-DA-A1HW', 'TCGA-DA-A1I1', 
-#'                                                    'TCGA-DA-A1I5', 'TCGA-DA-A1I7', 'TCGA-DA-A1IB', 'TCGA-DA-A95W', 
-#'                                                    'TCGA-DA-A95X', 'TCGA-EB-A41A', 'TCGA-EE-A2GJ', 'TCGA-FR-A726', 
-#'                                                    'TCGA-HR-A5NC', 'TCGA-XV-A9VZ'))
+#' 
+#' problem.barcodes <- c('TCGA-FR-A726', 'TCGA-D3-A8GP', 'TCGA-DA-A1HW', 'TCGA-DA-A1I1', 
+#'                       'TCGA-DA-A1I5', 'TCGA-DA-A1I7', 'TCGA-DA-A1IB', 'TCGA-DA-A95W', 
+#'                       'TCGA-DA-A95X', 'TCGA-EB-A41A', 'TCGA-EE-A2GJ', 'TCGA-FR-A726', 
+#'                       'TCGA-HR-A5NC', 'TCGA-XV-A9VZ')
 #'
-#' gdc$follow.up %>% filter(bcr_patient_barcode %in% c('TCGA-FR-A726', 'TCGA-D3-A8GP', 'TCGA-DA-A1HW', 'TCGA-DA-A1I1', 
-#'                                                    'TCGA-DA-A1I5', 'TCGA-DA-A1I7', 'TCGA-DA-A1IB', 'TCGA-DA-A95W', 
-#'                                                    'TCGA-DA-A95X', 'TCGA-EB-A41A', 'TCGA-EE-A2GJ', 'TCGA-FR-A726', 
-#'                                                    'TCGA-HR-A5NC', 'TCGA-XV-A9VZ')) %>%
+#' clinical.new %>% filter(bcr_patient_barcode %in% problem.barcodes)
+#'
+#'
+#' #
+#' #
+#' # Original clinical information from TCGAbiolinks
+#'
+#' clinical$all %>% filter(bcr_patient_barcode %in% problem.barcodes) %>%
+#'  select(bcr_patient_barcode, days_to_last_followup, days_to_death, vital_status,
+#'         year_of_form_completion, month_of_form_completion, day_of_form_completion) %>% arrange(bcr_patient_barcode)
+#' 
+#' #
+#' #
+#' # Original follow-up information from TCGAbiolinks
+#'
+#' gdc$follow.up %>% filter(bcr_patient_barcode %in% problem.barcodes) %>%
 #'  select(bcr_patient_barcode, days_to_last_followup, days_to_death, vital_status,
 #'         year_of_form_completion, month_of_form_completion, day_of_form_completion) %>% arrange(bcr_patient_barcode)
 update.survival.from.followup <- function(clinical, follow.up) {
