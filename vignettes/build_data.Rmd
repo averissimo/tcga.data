@@ -11,11 +11,12 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 params:
-  project: "TCGA-SKCM"
+  project: "TCGA-BRCA"
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
+library(futile.logger)
 ```
 
 # Package information
@@ -33,7 +34,7 @@ knitr::opts_chunk$set(echo = TRUE, warning=FALSE)
     - `mutation`
     - `gdc`
 
-### Example (for BRCA)
+### Example *(for BRCA)*
 
 ```{r install_brca.data, eval=FALSE}
 # load library or use directly if insta
@@ -124,12 +125,15 @@ if (file.exists(cached.file)) {
 } else {
   query <- list()
   # Query the GDC to obtain data
+  flog.info('Preparing query for clinical data...')
   query$clinical <- GDCquery(project       = project,
                              data.category = "Clinical",
                              file.type     = "xml")
   # Download query data
+  flog.info('Downloading clinical data...')
   GDCdownload(query$clinical, method = 'api')
 
+  flog.info('Organizing clinical data...')
   # Prepare R object with data
   gdc <- list()
   gdc$clinical        <- GDCprepare_clinic(query$clinical, clinical.info = 'patient')
@@ -140,11 +144,16 @@ if (file.exists(cached.file)) {
   gdc$stage_event     <- GDCprepare_clinic(query$clinical, clinical.info =  'stage_event')
   gdc$new_tumor_event <- GDCprepare_clinic(query$clinical, clinical.info =  'new_tumor_event')
   #
+  flog.info('Preparing query for biospecimen data...')
   query$biospecimen <- GDCquery(project       = project,
-                             data.category = "Biospecimen",
-                             file.type     = "xml")
+                                data.category = "Biospecimen",
+                                data.type     = 'Biospecimen Supplement',
+                                file.type     = "xml")
+  #
+  flog.info('Download biospecimen data...')
   GDCdownload(query$biospecimen, method = 'api')
   #
+  flog.info('Organizing biospecimen data...')
   gdc$bio.protocol  <- GDCprepare_clinic(query$biospecimen, clinical.info = 'protocol')
   gdc$bio.admin     <- GDCprepare_clinic(query$biospecimen, clinical.info = 'admin')
   gdc$bio.aliquot   <- GDCprepare_clinic(query$biospecimen, clinical.info = 'aliquot')
@@ -154,19 +163,28 @@ if (file.exists(cached.file)) {
   gdc$bio.portion   <- GDCprepare_clinic(query$biospecimen, clinical.info = 'portion')
   gdc$bio.slide     <- GDCprepare_clinic(query$biospecimen, clinical.info = 'slide')
   #
+  flog.info('Preparing query for RNASeq data...')
   query$rnaseq <- GDCquery(project = project,
                            data.category = "Transcriptome Profiling",
                            data.type     = "Gene Expression Quantification",
                            workflow.type = "HTSeq - FPKM")
   #
+  flog.info('Downloading RNASeq data...')
   GDCdownload(query$rnaseq, method = 'api', files.per.chunk = 6)
+  
+  flog.info('Organizing RNASeq data...')
   gdc$rnaseq <- GDCprepare(query$rnaseq)
   #
+  flog.info('Preparing query for mutation data...')
   query$mutation <- GDCquery(project = project,
                              data.category = "Simple Nucleotide Variation",
                              data.type     = "Masked Somatic Mutation",
                              workflow.type = "MuSE Variant Aggregation and Masking")
+  
+  flog.info('Downloading mutation data...')
   GDCdownload(query$mutation, method = 'api', files.per.chunk = 6)
+  
+  flog.info('Organizing mutation data')
   gdc$mutation <- GDCprepare(query$mutation)
   # clean up table by removing all rows that are NA
   gdc$mutation <- gdc$mutation[,colSums(is.na(gdc$mutation)) != nrow(gdc$mutation)]
@@ -185,16 +203,8 @@ library(ggplot2)
 library(tibble)
 library(dplyr)
 library(Matrix)
-#
-# this is distributed as part of the package
-getParticipant <- function(fullBarcode) {
-  source('../R/functions.R')
-  getParticipantCode(fullBarcode)
-}
-getSample <- function(fullBarcode) {
-  source('../R/functions.R')
-  getSampleTypeCode(fullBarcode)
-}
+
+devtools::load_all()
 ```
 
 ### Extracting all the barcodes
@@ -221,9 +231,10 @@ gene.ranges <- gdc$rnaseq@rowRanges
 #
 # clinical data
 rownames(gdc$clinical) <- gdc$clinical$bcr_patient_barcode
-gdc$clinical <- gdc$clinical
-clinical <- list()
-clinical$all <- gdc$clinical
+gdc$clinical           <- gdc$clinical
+clinical               <- list()
+clinical$all           <- gdc$clinical
+follow.up              <- gdc$follow.up
 ```
 
 ## Processing the data
@@ -298,13 +309,16 @@ for (el in names(fpkm.per.tissue)) {
 
 ```{r clinical}
 #
-# Add survival event time column
-survival.event.tmp <- clinical$all[, c('days_to_death', "days_to_last_followup", "vital_status")]
 #
-vital.status.ix <- !is.na(clinical$all$days_to_death)
-#
-clinical$all$surv_event_time[ vital.status.ix] <- clinical$all[ vital.status.ix,'days_to_death']
-clinical$all$surv_event_time[!vital.status.ix] <- clinical$all[!vital.status.ix,'days_to_last_followup']
+levels(clinical$all$vital_status) <- levels(clinical$all$vital_status) %>% {replace(., . == '', NA)}
+levels(follow.up$vital_status)    <- levels(follow.up$vital_status) %>% {replace(., . == '', NA)}
+
+updated.surv           <- update.survival.from.followup(clinical$all, follow.up) %>% as.data.frame
+rownames(updated.surv) <- updated.surv$bcr_patient_barcode
+
+clinical$all$surv_event_time <- updated.surv[clinical$all$bcr_patient_barcode, 'surv_event_time']
+clinical$all$vital_status    <- updated.surv[clinical$all$bcr_patient_barcode, 'vital_status']
+
 #
 #
 for (el in names(fpkm.per.tissue)[names(fpkm.per.tissue) != 'all']) {
