@@ -4,8 +4,8 @@
 \alias{build.assay}
 \title{Create MultiAssayExperiment object from data}
 \usage{
-build.assay(clinical.custom = NULL, gdc.custom = NULL,
-  mutation.custom = NULL, rnaseq.custom = NULL)
+build.assay(clinical.custom, gdc.custom, mutation.custom,
+  rnaseq.fpkm.custom, rnaseq.counts.custom)
 }
 \arguments{
 \item{clinical}{use custom clinical (that can be pre-processed)}
@@ -15,9 +15,4 @@ a MultiAssayExperiment object
 }
 \description{
 Create MultiAssayExperiment object from data
-}
-\examples{
-assay <- build.assay()
-assay[['RNASeq']]
-assar$vital_status
 }

@@ -4,81 +4,72 @@
 #'
 #' @return a MultiAssayExperiment object
 #' @export
-#'
-#' @examples
-#' assay <- build.assay()
-#' assay[['RNASeq']]
-#' assar$vital_status
-build.assay <- function(clinical.custom = NULL, 
-                        gdc.custom = NULL, 
-                        mutation.custom = NULL,
-                        rnaseq.custom = NULL) {
-  # get clinical data
-  if (is.null(clinical.custom)) {
-    data(clinical)
-    clin <- clinical$all  
-  } else {
-    clin <- clinical.custom
-  }
-  
-  futile.logger::flog.info('Loading \'Biospecimen\' data...')
-  if (is.null(gdc.custom)) {
-    data(gdc)
-    gdc.custom <- gdc
-  }
-  
-  # get all RNASeq data
-  futile.logger::flog.info('Joining \'RNASeq\' data...')
-  if (is.null(rnaseq.custom)) {
-    rnaseq.custom <- joinRNASeqData()
-  }
-      
-  futile.logger::flog.info('Loading \'Mutation\' data...')
-  if (is.null(mutation.custom)) {
-    data(mutation)
-    mutation.custom <- mutation$count
-  }
-  
+build.assay <- function(clinical.custom, 
+                        gdc.custom, 
+                        mutation.custom,
+                        rnaseq.fpkm.custom,
+                        rnaseq.counts.custom) {
+
   #
-  # Expression data
+  # Expression data (FPKM)
   
   # map expression data with clinical
-  es.map <- data.frame(master = strtrim(colnames(rnaseq.custom), 12), 
-                       assay = colnames(rnaseq.custom), 
+  es.map.fpkm <- data.frame(master = strtrim(colnames(rnaseq.fpkm.custom), 12), 
+                            assay  = colnames(rnaseq.fpkm.custom), 
+                            stringsAsFactors = FALSE)
+  
+  # filter only valid date.. i.e expression that have clinical data
+  valid.ix.fpkm  <- es.map.fpkm$master %in%  clinical.custom$bcr_patient_barcode
+  valid.dat.fpkm <- rnaseq.fpkm.custom[, valid.ix.fpkm]
+  
+  sample.barcode.fpkm <- strtrim(colnames(valid.dat.fpkm), 16)
+  valid.codes.fpkm    <- sample.barcode.fpkm[sample.barcode.fpkm %in% gdc$bio.sample$bcr_sample_barcode]
+  
+  fpkm.df           <- Biobase::AnnotatedDataFrame(gdc$bio.sample[valid.codes.fpkm,])
+  rownames(fpkm.df) <- colnames(valid.dat.fpkm)
+  
+  # build expression set
+  es.fpkm <- Biobase::ExpressionSet(assayData = valid.dat.fpkm, phenoData = fpkm.df)
+  
+  #
+  # Expression data (Counts)
+  
+  # map expression data with clinical
+  es.map.counts <- data.frame(master = strtrim(colnames(rnaseq.counts.custom), 12), 
+                       assay = colnames(rnaseq.counts.custom), 
                        stringsAsFactors = FALSE)
   
   # filter only valid date.. i.e expression that have clinical data
-  valid.ix <- es.map$master %in%  clin$bcr_patient_barcode
-  valid.dat <- rnaseq.custom[, valid.ix]
+  valid.ix.counts <- es.map.counts$master %in%  clinical.custom$bcr_patient_barcode
+  valid.dat.counts <- rnaseq.counts.custom[, valid.ix.counts]
   
-  sample.barcode <- strtrim(colnames(valid.dat), 16)
-  valid.codes <- sample.barcode[sample.barcode %in% gdc$bio.sample$bcr_sample_barcode]
+  sample.barcode.counts <- strtrim(colnames(valid.dat.counts), 16)
+  valid.codes.counts    <- sample.barcode.counts[sample.barcode.counts %in% gdc$bio.sample$bcr_sample_barcode]
   
-  temp.df <- Biobase::AnnotatedDataFrame(gdc$bio.sample[valid.codes,])
-  rownames(temp.df) <- colnames(valid.dat)
+  counts.df <- Biobase::AnnotatedDataFrame(gdc$bio.sample[valid.codes.counts,])
+  rownames(counts.df) <- colnames(valid.dat.counts)
   
   # build expression set
-  es  <- Biobase::ExpressionSet(assayData = valid.dat, phenoData = temp.df)
+  es.counts  <- Biobase::ExpressionSet(assayData = valid.dat.counts, phenoData = counts.df)
   
   #
   # Mutation data
   mutation.colnames <- colnames(mutation.custom)  
-  valid.ix <- colnames(mutation.custom) %in% clin$bcr_patient_barcode
+  valid.ix          <- colnames(mutation.custom) %in% clinical$bcr_patient_barcode
   
   mut.map <- data.frame(master = mutation.colnames[valid.ix], assay = mutation.colnames[valid.ix])
-  
-  mut <- SingleCellExperiment::SingleCellExperiment(assays = list(counts = mutation.custom))
+  mut     <- SingleCellExperiment::SingleCellExperiment(assays = list(counts = mutation.custom))
   
   #
   # Setup to create MultiAssayExperiment object
   
   futile.logger::flog.info('Building Assay...')
-  listmap <- list(es.map, mut.map)
-  names(listmap) <- c("RNASeq", "Mutation")
+  listmap <- list(es.map.fpkm, es.map.counts, mut.map)
+  names(listmap) <- c("RNASeqFPKM", "RNASeqCounts", "Mutation")
   
   dfmap <- MultiAssayExperiment::listToMap(listmap)
-  objlist <- list("RNASeq" = es, "Mutation" = mut)
-  my.assay <- MultiAssayExperiment::MultiAssayExperiment(objlist, clin, dfmap)
+  objlist <- list("RNASeqFPKM" = es.fpkm, "RNASeqCounts" = es.fpkm, "Mutation" = mut)
+  my.assay <- MultiAssayExperiment::MultiAssayExperiment(objlist, clinical.custom, dfmap)
   
   return(my.assay)
 }

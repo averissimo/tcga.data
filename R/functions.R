@@ -15,57 +15,43 @@ getParticipantCode <- function(fullBarcode) {
   return(gsub(tcga.barcode.pattern, '\\1', fullBarcode))
 }
 
-
-#' Get Sample Type part of TCGA Barcode
-#'
-#' XX - where 01 is solid tumor, 06 is metasteses, etc..
-#'
-#' See [Code Tables Report](https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables/sample-type-codes) for a complete list of sample codes.
-#'
-#' @param fullBarcode number, or  vector of numbers
-#'
-#' @return sample code
-#' @export
-#'
-#' @examples
-#' getParticipantCode('TCGA-3C-AAAU-01A-11R-A41B-07')
-#' getParticipantCode(c('TCGA-3C-AAAU-01A-11R-A41B-07', 'TCGA-3C-AALI-01A-11R-A41B-07'))
-getSampleTypeCode <- function(fullBarcode) {
-  tcga.barcode.pattern <- '(TCGA-[A-Z0-9a-z]{2}-[a-zA-Z0-9]{4})-([0-9]{2}).*'
-  return(gsub(tcga.barcode.pattern, '\\2', fullBarcode))
-}
-
-#' Joins all expression data in a single matrix
-#'
-#' This is not stored directly as it would be duplicate information
-#'  which takes a lot of storage
-#'
-#' @return a matrix with gene expression levels and all tissue samples
-#' @export
-joinRNASeqData <- function() {
-  # load tissue data
-  data(fpkm.per.tissue)
-
-  # iterate on all and join in a single matrix
-  out.dat <- c()
-  for (ix in names(fpkm.per.tissue)) {
-    out.dat <- cbind(out.dat, fpkm.per.tissue[[ix]])
+build.matrix <- function(source.name) {
+  
+  ret.list <- list()
+  cli.list <- list()
+  
+  data('multiAssay')
+  
+  if (source.name %in% names(multiAssay)) {
+    if (source.name == 'Mutation') {
+      return(multiAssay[[source.name]]@assays[['counts']])
+    } else if (source.name %in% c('RNASeqFPKM', 'RNASeqCounts')) {
+      suppressMessages(
+        new.assay <- multiAssay[,,source.name]
+      )
+      for (sample_id in unique(new.assay[[source.name]]@phenoData$sample_type)) {
+        sample.id <- gsub(' ', '.', sample_id) %>% tolower()
+        # keep only one type of sample
+        suppressMessages(
+          tmp.assay <- new.assay[,new.assay[[source.name]]$sample_type == sample_id,source.name]
+          )
+        
+        ret.list[[sample.id]] <- Biobase::exprs(tmp.assay[[source.name]])
+        cli.list[[sample.id]] <- tmp.assay@colData
+        
+        full.code                       <- colnames(ret.list[[sample.id]])
+        colnames(ret.list[[sample.id]]) <- strtrim(colnames(ret.list[[sample.id]]), 12)
+      }
+      
+      flog.info('Individuals per sample type for %s', source.name)
+      for (ix.name in names(ret.list)) {
+        flog.info('  * %s: %d', ix.name, ncol(ret.list[[ix.name]]))
+      }
+      return(list(clinical = cli.list, data = ret.list, original.codes = full.code))
+    } else {
+      stop('Source must be one of the assays in multiAssay data object')  
+    }
+  } else {
+    stop('Source must be one of the assays in multiAssay data object')
   }
-  return(out.dat)
-}
-
-#' Get rnaseq assay data to GDC object
-#'
-#' This cannot be cached in the package as it takes too much space and
-#'  would be redundant with fpkm.per.tissue data
-#'
-#' @return a full gdc
-#' @export
-loadGDCRnaSeq <- function() {
-  data(gdc)
-
-  temp.dat <- joinRNASeqData()
-  gdc$rnaseq@assays[[1]] <- temp.dat
-
-  return(gdc)
 }

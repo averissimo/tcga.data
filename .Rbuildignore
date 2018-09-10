@@ -7,3 +7,8 @@ vignettes/Human_genes__GRCh38_p10_\.rda
 backup/
 GDCdata
 ^.*\.csv
+^.*\.zip
+^data$
+^.*\.tar\.gz
+.*\.RData
+

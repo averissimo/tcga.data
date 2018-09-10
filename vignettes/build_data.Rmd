@@ -28,27 +28,20 @@ library(futile.logger)
 1. Load the library
 
 1. Load the required datasets (one or more of the following)
-    - `clinical`
-    - `fpkm.per.tissue`
-    - `fpkm.per.tissue.barcode`
-    - `mutation`
-    - `gdc`
+    - `multiAssay`
+    - `gdc.original`
 
 ### Example *(for BRCA)*
 
 ```{r install_brca.data, eval=FALSE}
-# load library or use directly if insta
-install.packages('devtools')
 # The library can also be loaded and use the function install_git without 'devtools::' prefix
-devtools::install_url('https://github.com/averissimo/tcga.data/releases/download/2016.12.15-brca/brca.data_1.0.tar.gz')
+BiocManager::install('https://github.com/averissimo/tcga.data/releases/download/2016.12.15-brca/brca.data_1.0.tar.gz')
 #
 # Load the brca.data package
 library(brca.data)
-# start using the data, for example the tissue data
-data(fpkm.per.tissue)
-# tissue is now in the enviromnet and will be loaded on the first
-#  time it is used. For example:
-names(fpkm.per.tissue)
+# start using the data
+data(multiAssay)
+multiAssay
 ```
 
 ## Description of the data set
@@ -107,14 +100,12 @@ Explanation of TCGA barcode using example `TCGA-02-0001-01C-01D-0182-01`
 The data set can also be extracted through the [TCGAbiolinks R bioconductor package](https://bioconductor.org/packages/release/bioc/html/TCGAbiolinks.html)
 
 ```{r install_biolinks, eval=FALSE}
-source("https://bioconductor.org/biocLite.R")
-biocLite("TCGAbiolinks")
+BiocManager::install("TCGAbiolinks")
 ```
 
 #### Download data (project: *`r params$project`*)
 
 Change `project` variable to get other data projects in TCGA.
-
 
 ```{r biolinks}
 library(TCGAbiolinks)
@@ -149,6 +140,9 @@ if (file.exists(cached.file)) {
                                 data.category = "Biospecimen",
                                 data.type     = 'Biospecimen Supplement',
                                 file.type     = "xml")
+  
+  # only pre-processing needed for bio.sample
+  rownames(gdc$bio.sample) <- gdc$bio.sample$bcr_sample_barcode
   #
   flog.info('Download biospecimen data...')
   GDCdownload(query$biospecimen, method = 'api')
@@ -163,17 +157,28 @@ if (file.exists(cached.file)) {
   gdc$bio.portion   <- GDCprepare_clinic(query$biospecimen, clinical.info = 'portion')
   gdc$bio.slide     <- GDCprepare_clinic(query$biospecimen, clinical.info = 'slide')
   #
-  flog.info('Preparing query for RNASeq data...')
-  query$rnaseq <- GDCquery(project = project,
+  flog.info('Preparing query for RNASeq FPKM data...')
+  query$rnaseq.fpkm <- GDCquery(project = project,
                            data.category = "Transcriptome Profiling",
                            data.type     = "Gene Expression Quantification",
-                           workflow.type = "HTSeq - FPKM")
+                           workflow.type = "HTSeq - FPKM") 
   #
-  flog.info('Downloading RNASeq data...')
-  GDCdownload(query$rnaseq, method = 'api', files.per.chunk = 6)
+  flog.info('Downloading RNASeq FPKM data...')
+  GDCdownload(query$rnaseq.fpkm, method = 'api', files.per.chunk = 6)
+  
+  flog.info('Preparing query for RNASeq Counts data...')
+  query$rnaseq.counts <- GDCquery(project = project,
+                           data.category = "Transcriptome Profiling",
+                           data.type     = "Gene Expression Quantification",
+                           workflow.type = "HTSeq - Counts")
+  
+  #
+  flog.info('Downloading RNASeq Counts data...')
+  GDCdownload(query$rnaseq.counts, method = 'api', files.per.chunk = 6)
   
   flog.info('Organizing RNASeq data...')
-  gdc$rnaseq <- GDCprepare(query$rnaseq)
+  gdc$rnaseq.fpkm   <- GDCprepare(query$rnaseq.fpkm)
+  gdc$rnaseq.counts <- GDCprepare(query$rnaseq.counts)
   #
   flog.info('Preparing query for mutation data...')
   query$mutation <- GDCquery(project = project,
@@ -217,121 +222,43 @@ Pattern to retrieve TCGA patient and sample type from extended barcode.
 tcga.barcode.pattern <- '(TCGA-[A-Z0-9a-z]{2}-[a-zA-Z0-9]{4})-([0-9]{2}).+'
 #
 # patient barcode for each column in tcga.data$dat
-fpkm.per.tissue.barcode <- list()
-fpkm.per.tissue.barcode$all <- getParticipant(gdc$rnaseq@colData$barcode)
+fpkm.per.tissue.barcode <- getParticipantCode(gdc$rnaseq.fpkm@colData$barcode)
 #
 # getting all tisues
-fpkm.per.tissue <- list()
-fpkm.per.tissue$all <- as.matrix(gdc$rnaseq@assays$data[['HTSeq - FPKM']])
-colnames(fpkm.per.tissue$all) <- gdc$rnaseq@colData$barcode
+fpkm.per.tissue           <- as.matrix(gdc$rnaseq.fpkm@assays$data[["HTSeq - FPKM"]])
+colnames(fpkm.per.tissue) <- gdc$rnaseq.fpkm@colData$barcode
+rownames(fpkm.per.tissue) <- gdc$rnaseq.fpkm@rowRanges$ensembl_gene_id
+
+# Counts
+counts.per.tissue           <- as.matrix(gdc$rnaseq.counts@assays$data[["HTSeq - Counts"]])
+colnames(counts.per.tissue) <- gdc$rnaseq.counts@colData$barcode
+rownames(counts.per.tissue) <- gdc$rnaseq.counts@rowRanges$ensembl_gene_id
+
 #
-rownames(fpkm.per.tissue$all) <- gdc$rnaseq@rowRanges$ensembl_gene_id
-#
-gene.ranges <- gdc$rnaseq@rowRanges
+gene.ranges <- gdc$rnaseq.fpkm@rowRanges
 #
 # clinical data
 rownames(gdc$clinical) <- gdc$clinical$bcr_patient_barcode
 gdc$clinical           <- gdc$clinical
-clinical               <- list()
-clinical$all           <- gdc$clinical
+clinical               <- gdc$clinical
 follow.up              <- gdc$follow.up
 ```
 
 ## Processing the data
-
-### Mapping all types of sample (tumor, normal, metastases, control...)
-
-See [Code Tables Report](https://gdc.cancer.gov/resources-tcga-users/tcga-code-tables/sample-type-codes) for a complete list of sample codes.
-
-```{r tissue_mapping}
-# sample type per sample
-tissue.type  <- as.numeric(getSample(colnames(fpkm.per.tissue$all)))
-#
-# mapping for tissue type
-tissue.mapping <- list( 
-  'primary.solid.tumor' = 01,
-  'recurrent.solid.tumor' = 02,
-  'primary.blood.derived.cancer.peripheral.blood' = 03,
-  'recurrent.blood.derived.cancer.bone.marrow' = 04,
-  'additional.new.primary' = 05,
-  'metastatic' = 06,
-  'additional.metastatic' = 07,
-  'human.tumor.original.cells' = 08,
-  'primary.blood.derived.cancer.bone.marrow' = 09,
-  'blood.derived.normal' = 10,
-  'solid.tissue.normal' = 11,
-  'buccal.cell.normal' = 12,
-  'ebv.immortalized.normal' = 13,
-  'bone.marrow.normal' = 14,
-  'sample.type.15' = 15,
-  'sample.type.16' = 16,
-  'control.analyte' = 20,
-  'recurrent.blood.derived.cancer.peripheral.blood' = 40,
-  'cell.lines' = 50,
-  'primary.xenograft.tissue' = 60,
-  'cell.line.derived.xenograft.tissue' = 61,
-  'sample.type.99' = 99
-)
-#
-# Types of tissues
-tissue.ix <- list()
-for (el in names(tissue.mapping)) {
-  tissue.ix[[el]] <- (tissue.type == tissue.mapping[[el]])
-  if (any(tissue.ix[[el]])) {
-    fpkm.per.tissue[[el]] <- as.matrix(fpkm.per.tissue$all[,tissue.ix[[el]]])
-    colnames(fpkm.per.tissue[[el]]) <- colnames(fpkm.per.tissue$all)[tissue.ix[[el]]]
-    rownames(fpkm.per.tissue[[el]]) <- rownames(fpkm.per.tissue$all)
-  }
-}
-```
-
-### Size of data from each tissue
-
-```{r tissue_info}
-sample.size <- c()
-for (el in names(fpkm.per.tissue)) {
-  sample.size <- rbind(sample.size, c(ncol(fpkm.per.tissue[[el]]), nrow(fpkm.per.tissue[[el]])))
-}
-rownames(sample.size) <- names(fpkm.per.tissue)
-colnames(sample.size) <- c('# of Samples', '# of Genes')
-futile.logger::flog.info('Tissue information per tissue type:', sample.size, capture = TRUE)
-```
-
-### Store all patient's barcode from `tissue` in `tissue.barcode`
-
-```{r per_tissue_barcode}
-for (el in names(fpkm.per.tissue)) {
-  fpkm.per.tissue.barcode[[el]] <- getParticipant(colnames(fpkm.per.tissue[[el]]))
-}
-```
 
 ### Store patient's clinical data
 
 ```{r clinical}
 #
 #
-levels(clinical$all$vital_status) <- levels(clinical$all$vital_status) %>% {replace(., . == '', NA)}
+levels(clinical$vital_status) <- levels(clinical$vital_status) %>% {replace(., . == '', NA)}
 levels(follow.up$vital_status)    <- levels(follow.up$vital_status) %>% {replace(., . == '', NA)}
 
-updated.surv           <- update.survival.from.followup(clinical$all, follow.up) %>% as.data.frame
+updated.surv           <- update.survival.from.followup(clinical, follow.up) %>% as.data.frame
 rownames(updated.surv) <- updated.surv$bcr_patient_barcode
 
-clinical$all$surv_event_time <- updated.surv[clinical$all$bcr_patient_barcode, 'surv_event_time']
-clinical$all$vital_status    <- updated.surv[clinical$all$bcr_patient_barcode, 'vital_status']
-
-#
-#
-for (el in names(fpkm.per.tissue)[names(fpkm.per.tissue) != 'all']) {
-  clinical[[el]] <- clinical$all[unique(fpkm.per.tissue.barcode[[el]]),]
-}
-#
-sample.size <- c()
-for (el in names(clinical)) {
-  sample.size <- rbind(sample.size, c(nrow(clinical[[el]]), ncol(clinical[[el]])))
-}
-rownames(sample.size) <- names(fpkm.per.tissue)
-colnames(sample.size) <- c('# of Samples', '# of Features')
-futile.logger::flog.info('Clinical information per tissue type:', sample.size, capture = TRUE)
+clinical$surv_event_time <- updated.surv[clinical$bcr_patient_barcode, 'surv_event_time']
+clinical$vital_status    <- updated.surv[clinical$bcr_patient_barcode, 'vital_status']
 ```
 
 ### Mutations
@@ -356,7 +283,7 @@ mutation$dups <- dplyr::arrange(mutation$dups, Hugo_Symbol, Tumor_Sample_Barcode
 mutation$count <- matrix(integer(1), ncol = nrow(gdc$clinical), nrow = length(unique(mutation$data$Gene)), 
                          dimnames = list(unique(mutation$data$Gene), gdc$clinical$bcr_patient_barcode))
 # get a temporary index list for fast access
-ix.list <- cbind(mutation$data$Gene, getParticipant(mutation$data$Tumor_Sample_Barcode))
+ix.list <- cbind(mutation$data$Gene, getParticipantCode(mutation$data$Tumor_Sample_Barcode))
 ix.list <- ix.list[!is.na(mutation$data$Gene),]
 ix.list <- as.tibble(ix.list, stringsAsFactors = FALSE)
 colnames(ix.list) <- c('gene', 'patient')
@@ -394,40 +321,31 @@ ggplot(data = mutations.by.case) +
 
 Builds a multiAssayExperiment with clinical, rnaseq and mutation count data
 
-```{r, eval=FALSE}
-source('../R/load_assay.R')
-multiAssay <- build.assay(clinical.custom = clinical$all, 
-                          gdc.custom = gdc, 
-                          mutation.custom = mutation$count,
-                          rnaseq.custom = fpkm.per.tissue$all)
+```{r}
+multiAssay <- build.assay(clinical.custom      = clinical, 
+                          gdc.custom           = gdc, 
+                          mutation.custom      = mutation$count,
+                          rnaseq.fpkm.custom   = fpkm.per.tissue,
+                          rnaseq.counts.custom = counts.per.tissue)
 ```
 
 
 ## Exported data
 
-- `fpkm.per.tissue`: gene expression data for all types of tissues, see `names(tissue)`;
-- `fpkm.per.tissue.barcode`: Patient's participation data code (TCGA-XX-XXXX) per type of tissue;
-- `clinical`: Clinical data per tissue type. Has the same structure as tissue.
-- `mutation`: Mutation data from GDC (filtered) and a matrix of counts.
+- `gdc.original`: original data taken from TCGABiolinks, with the exception of expression data;
+- `multiAssay`: MultiExperimentAssay object containing clinical, RNASeq FPKM, RNASeq Counts and mutation count;
 
-```{r export_data, include=FALSE, eval=FALSE}
+```{r export_data, include=FALSE, eval=TRUE}
 # Extract all expression data to a different variable to remove redundancy in `tissue`
-fpkm.per.tissue$all <- NULL
-gdc$rnaseq     <- 'Use function loadGDCRnaSeq to get the original assay'
-#
-#
-# Uncomment to update data variables
-#
-devtools::use_data(gdc,                     overwrite = TRUE)
-devtools::use_data(fpkm.per.tissue,         overwrite = TRUE)
-devtools::use_data(fpkm.per.tissue.barcode, overwrite = TRUE)
-devtools::use_data(clinical,                overwrite = TRUE)
-devtools::use_data(gene.ranges,             overwrite = TRUE)
-devtools::use_data(mutation,                overwrite = TRUE)
-#devtools::use_data(multiAssay,              overwrite = TRUE)
+gdc.original <- gdc
+gdc.original$rnaseq.counts <- NULL
+gdc.original$rnaseq.fpkm   <- NULL
+devtools::use_data(gdc.original, overwrite = TRUE)
+devtools::use_data(multiAssay,   overwrite = TRUE)
 ```
 
 ```{r, include=FALSE, eval=FALSE}
+rmarkdown::render('build_data.Rmd', output_file = 'README.md', output_dir = '..', params = list(project = "TCGA-SKCM"))
 rmarkdown::render('build_data.Rmd', output_file = 'README.md', output_dir = '..')
 ```
 

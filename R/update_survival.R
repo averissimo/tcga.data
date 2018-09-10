@@ -9,7 +9,7 @@
 #' @param clinical data.frame with clinical information from TCGA project
 #' @param follow.up data.frame with follow-up information from TCGA project
 #'
-#' @return
+#' @return an update clinical data
 #' @export
 #'
 #' @examples
