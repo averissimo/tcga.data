@@ -17,6 +17,7 @@ Suggests:
     futile.logger,
     TCGAbiolinks,
     knitr,
-    rmarkdown
+    rmarkdown,
+    dplyr
 RoxygenNote: 6.1.0
 VignetteBuilder: knitr

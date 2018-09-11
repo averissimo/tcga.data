@@ -1,3 +1,6 @@
+# 
+^vignettes/build_data.Rmd$
+
 # R project files
 
 ^.*\.Rproj$
