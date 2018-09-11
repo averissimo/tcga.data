@@ -29,6 +29,13 @@ In older versions of this package, prior to September 2018, the dataset was name
 
 To recover the datasets in the old matrix format use the following
 
+``` r
+data('multiAssay')
+fpkm.data <- build.matrix('RNASeqFPKM', multiAssay)
+fpkm.per.tissue <- fpkm.data$data
+fpkm.clinical   <- fpkm.data$clinical
+```
+
 #### Example for BRCA package
 
 ``` r

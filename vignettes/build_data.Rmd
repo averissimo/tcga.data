@@ -140,9 +140,7 @@ if (file.exists(cached.file)) {
                                 data.category = "Biospecimen",
                                 data.type     = 'Biospecimen Supplement',
                                 file.type     = "xml")
-  
-  # only pre-processing needed for bio.sample
-  rownames(gdc$bio.sample) <- gdc$bio.sample$bcr_sample_barcode
+
   #
   flog.info('Download biospecimen data...')
   GDCdownload(query$biospecimen, method = 'api')
@@ -157,6 +155,10 @@ if (file.exists(cached.file)) {
   gdc$bio.portion   <- GDCprepare_clinic(query$biospecimen, clinical.info = 'portion')
   gdc$bio.slide     <- GDCprepare_clinic(query$biospecimen, clinical.info = 'slide')
   #
+
+  # only pre-processing needed for bio.sample
+  rownames(gdc$bio.sample) <- gdc$bio.sample$bcr_sample_barcode
+  
   flog.info('Preparing query for RNASeq FPKM data...')
   query$rnaseq.fpkm <- GDCquery(project = project,
                            data.category = "Transcriptome Profiling",

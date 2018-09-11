@@ -15,19 +15,32 @@ getParticipantCode <- function(fullBarcode) {
   return(gsub(tcga.barcode.pattern, '\\1', fullBarcode))
 }
 
-build.matrix <- function(source.name) {
+#' Build list of matrices with different types of tissues
+#'
+#' @param source.name data type
+#' @param assay.data data from MultiAssayExperiment
+#'
+#' @return data divided by tissue type, with clinical and source.name assay
+#' @export
+#'
+#' @examples
+#' data('multiAssay')
+#' fpkm.data <- build.matrix('RNASeqFPKM', multiAssay)
+#' fpkm.per.tissue <- fpkm.data$data
+#' fpkm.clinical   <- fpkm.data$clinical
+#' names(fpkm.per.tissue)
+build.matrix <- function(source.name, assay.data) {
   
   ret.list <- list()
   cli.list <- list()
+  full.code <- list()
   
-  data('multiAssay')
-  
-  if (source.name %in% names(multiAssay)) {
+  if (source.name %in% names(assay.data)) {
     if (source.name == 'Mutation') {
-      return(multiAssay[[source.name]]@assays[['counts']])
+      return(assay.data[[source.name]]@assays[['counts']])
     } else if (source.name %in% c('RNASeqFPKM', 'RNASeqCounts')) {
       suppressMessages(
-        new.assay <- multiAssay[,,source.name]
+        new.assay <- assay.data[,,source.name]
       )
       for (sample_id in unique(new.assay[[source.name]]@phenoData$sample_type)) {
         sample.id <- gsub(' ', '.', sample_id) %>% tolower()
@@ -35,11 +48,10 @@ build.matrix <- function(source.name) {
         suppressMessages(
           tmp.assay <- new.assay[,new.assay[[source.name]]$sample_type == sample_id,source.name]
           )
-        
         ret.list[[sample.id]] <- Biobase::exprs(tmp.assay[[source.name]])
         cli.list[[sample.id]] <- tmp.assay@colData
         
-        full.code                       <- colnames(ret.list[[sample.id]])
+        full.code[[sample.id]]          <- colnames(ret.list[[sample.id]])
         colnames(ret.list[[sample.id]]) <- strtrim(colnames(ret.list[[sample.id]]), 12)
       }
       

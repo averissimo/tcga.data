@@ -1,14 +1,27 @@
+# R project files
+
 ^.*\.Rproj$
 ^\.Rproj\.user$
+
+# Cache files
+
 tcga-biolinks-.*-cache.*\.RData
+
+# TCGAbiolinks generated files
+
 vignettes/GDCdata
 vignettes/MANIFEST\.txt
 vignettes/Human_genes__GRCh38_p10_\.rda
-backup/
 GDCdata
-^.*\.csv
-^.*\.zip
-^data$
-^.*\.tar\.gz
-.*\.RData
 
+# Data files
+
+\.csv$
+\.zip$
+\.tar\.gz$
+\.RData$
+^vignettes/.*\.rda$
+
+^README\.md$
+^README\.html$
+^README_files$
