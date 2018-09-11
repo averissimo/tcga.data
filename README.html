@@ -44,18 +44,15 @@ body {
 <li><p>Load the library</p></li>
 <li>Load the required datasets (one or more of the following)
 <ul>
-<li><code>clinical</code></li>
-<li><code>fpkm.per.tissue</code></li>
-<li><code>fpkm.per.tissue.barcode</code></li>
-<li><code>mutation</code></li>
-<li><code>gdc</code></li>
+<li><code>multiAssay</code></li>
+<li><code>gdc.original</code></li>
 </ul></li>
 </ol>
+<p>In older versions of this package, prior to September 2018, the dataset was named <code>fpkm.per.tissue</code> or <code>mutation</code>, but we since improved the storage using a MultiAssayExperiment object from bioconductor.</p>
+<p>To recover the datasets in the old matrix format use the following</p>
 <h4 id="example-for-brca-package">Example for BRCA package</h4>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># install the devtooks library</span>
-<span class="kw">install.packages</span>(<span class="st">'devtools'</span>)
-<span class="co"># The library can also be loaded and use the function install_git without 'devtools::' prefix</span>
-devtools<span class="op">::</span><span class="kw">install_url</span>(<span class="st">'https://github.com/averissimo/tcga.data/releases/download/2016.12.15-brca/brca.data_1.0.tar.gz'</span>)
+<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># The library can also be loaded and use the function install_git without 'devtools::' prefix</span>
+BiocManager<span class="op">::</span><span class="kw">install</span>(<span class="st">'https://github.com/averissimo/tcga.data/releases/download/2016.12.15-brca/brca.data_1.0.tar.gz'</span>)
 <span class="co">#</span>
 <span class="co"># Load the brca.data package</span>
 <span class="kw">library</span>(brca.data)
@@ -79,7 +76,7 @@ devtools<span class="op">::</span><span class="kw">install_url</span>(<span clas
 <li>Run <code>devtools::build()</code> to build the actual package</li>
 </ol>
 <h2 id="ackowledgements">Ackowledgements</h2>
-<p>This package was developed primarily by <em><a href="http://web.tecnico.ulisboa.pt/andre.verissimo/">André Veríssimo</a></em> with support from <em>Marta Lopes</em> and <em><a href="http://web.tecnico.ulisboa.pt/susanavinga/">Susana Vinga</a></em></p>
+<p>This package was developed primarily by <em><a href="http://web.tecnico.ulisboa.pt/andre.verissimo/">André Veríssimo</a></em> with support from <em>Marta Lopes</em>, <em>Eunice Carrasquinha</em> and <em><a href="http://web.tecnico.ulisboa.pt/susanavinga/">Susana Vinga</a></em></p>
 <p>This work was supported by:</p>
 <ul>
 <li><a href="www.fct.pt">FCT</a>, through IDMEC, under LAETA, projects <em>(UID/EMS/50022/2013)</em>;</li>

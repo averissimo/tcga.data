@@ -345,7 +345,6 @@ devtools::use_data(multiAssay,   overwrite = TRUE)
 ```
 
 ```{r, include=FALSE, eval=FALSE}
-rmarkdown::render('build_data.Rmd', output_file = 'README.md', output_dir = '..', params = list(project = "TCGA-SKCM"))
-rmarkdown::render('build_data.Rmd', output_file = 'README.md', output_dir = '..')
+rmarkdown::render('build_data.Rmd')
 ```
 
