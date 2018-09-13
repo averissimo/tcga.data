@@ -6,27 +6,28 @@
 #' @export
 build.assay <- function(clinical.custom, 
                         gdc.custom, 
-                        mutation.custom,
-                        rnaseq.fpkm.custom,
-                        rnaseq.counts.custom) {
+                        mutation.custom) {
 
-  #
+    #
   # Expression data (FPKM)
   
   # map expression data with clinical
-  es.map.fpkm <- data.frame(master = strtrim(colnames(rnaseq.fpkm.custom), 12), 
-                            assay  = colnames(rnaseq.fpkm.custom), 
+  es.map.fpkm <- data.frame(master = strtrim(colnames(gdc$rnaseq.fpkm), 12), 
+                            assay  = colnames(gdc$rnaseq.fpkm), 
                             stringsAsFactors = FALSE)
   
   # filter only valid date.. i.e expression that have clinical data
   valid.ix.fpkm  <- es.map.fpkm$master %in%  clinical.custom$bcr_patient_barcode
-  valid.dat.fpkm <- rnaseq.fpkm.custom[, valid.ix.fpkm]
+  valid.dat.fpkm <- gdc$rnaseq.fpkm[, valid.ix.fpkm]@assays@.xData$data[['HTSeq - FPKM']]
+  colnames(valid.dat.fpkm) <- colnames(gdc$rnaseq.fpkm[, valid.ix.fpkm])
+  rownames(valid.dat.fpkm) <- rownames(gdc$rnaseq.fpkm[, valid.ix.fpkm])
   
-  sample.barcode.fpkm <- strtrim(colnames(valid.dat.fpkm), 16)
-  valid.codes.fpkm    <- sample.barcode.fpkm[sample.barcode.fpkm %in% gdc$bio.sample$bcr_sample_barcode]
+  #sample.barcode.fpkm <- strtrim(colnames(valid.dat.fpkm), 16)
+  #valid.codes.fpkm    <- sample.barcode.fpkm[sample.barcode.fpkm %in% gdc$bio.sample$bcr_sample_barcode]
   
-  fpkm.df           <- Biobase::AnnotatedDataFrame(gdc$bio.sample[valid.codes.fpkm,])
-  rownames(fpkm.df) <- colnames(valid.dat.fpkm)
+  #fpkm.df           <- Biobase::AnnotatedDataFrame(gdc$bio.sample[valid.codes.fpkm,])
+  fpkm.df <- Biobase::AnnotatedDataFrame(gdc$rnaseq.fpkm[, valid.ix.fpkm]@colData %>% as.data.frame)
+  #rownames(fpkm.df) <- colnames(valid.dat.fpkm)
   
   # build expression set
   es.fpkm <- Biobase::ExpressionSet(assayData = valid.dat.fpkm, phenoData = fpkm.df)
@@ -35,19 +36,21 @@ build.assay <- function(clinical.custom,
   # Expression data (Counts)
   
   # map expression data with clinical
-  es.map.counts <- data.frame(master = strtrim(colnames(rnaseq.counts.custom), 12), 
-                       assay = colnames(rnaseq.counts.custom), 
+  es.map.counts <- data.frame(master = strtrim(colnames(gdc$rnaseq.counts), 12), 
+                       assay = colnames(gdc$rnaseq.counts), 
                        stringsAsFactors = FALSE)
   
   # filter only valid date.. i.e expression that have clinical data
-  valid.ix.counts <- es.map.counts$master %in%  clinical.custom$bcr_patient_barcode
-  valid.dat.counts <- rnaseq.counts.custom[, valid.ix.counts]
+  valid.ix.counts  <- es.map.counts$master %in%  clinical.custom$bcr_patient_barcode
+  valid.dat.counts <- gdc$rnaseq.counts[, valid.ix.counts]@assays@.xData$data[['HTSeq - Counts']]
+  colnames(valid.dat.counts) <- colnames(gdc$rnaseq.counts[, valid.ix.counts])
+  rownames(valid.dat.counts) <- rownames(gdc$rnaseq.counts[, valid.ix.counts])
   
-  sample.barcode.counts <- strtrim(colnames(valid.dat.counts), 16)
-  valid.codes.counts    <- sample.barcode.counts[sample.barcode.counts %in% gdc$bio.sample$bcr_sample_barcode]
   
-  counts.df <- Biobase::AnnotatedDataFrame(gdc$bio.sample[valid.codes.counts,])
-  rownames(counts.df) <- colnames(valid.dat.counts)
+  #sample.barcode.counts <- strtrim(colnames(valid.dat.counts), 16)
+  #valid.codes.counts    <- sample.barcode.counts[sample.barcode.counts %in% gdc$bio.sample$bcr_sample_barcode]
+  
+  counts.df <- Biobase::AnnotatedDataFrame(gdc$rnaseq.counts[, valid.ix.counts]@colData %>% as.data.frame)
   
   # build expression set
   es.counts  <- Biobase::ExpressionSet(assayData = valid.dat.counts, phenoData = counts.df)

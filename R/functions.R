@@ -31,8 +31,8 @@ getParticipantCode <- function(fullBarcode) {
 #' names(fpkm.per.tissue)
 build.matrix <- function(source.name, assay.data) {
   
-  ret.list <- list()
-  cli.list <- list()
+  ret.list  <- list()
+  cli.list  <- list()
   full.code <- list()
   
   if (source.name %in% names(assay.data)) {
@@ -42,11 +42,11 @@ build.matrix <- function(source.name, assay.data) {
       suppressMessages(
         new.assay <- assay.data[,,source.name]
       )
-      for (sample_id in unique(new.assay[[source.name]]@phenoData$sample_type)) {
+      for (sample_id in unique(new.assay[[source.name]]@phenoData$definition)) {
         sample.id <- gsub(' ', '.', sample_id) %>% tolower()
         # keep only one type of sample
         suppressMessages(
-          tmp.assay <- new.assay[,new.assay[[source.name]]$sample_type == sample_id,source.name]
+          tmp.assay <- new.assay[,new.assay[[source.name]]$definition == sample_id,source.name]
           )
         ret.list[[sample.id]] <- Biobase::exprs(tmp.assay[[source.name]])
         cli.list[[sample.id]] <- tmp.assay@colData

@@ -146,18 +146,30 @@ if (file.exists(cached.file)) {
   GDCdownload(query$biospecimen, method = 'api')
   #
   flog.info('Organizing biospecimen data...')
-  gdc$bio.protocol  <- GDCprepare_clinic(query$biospecimen, clinical.info = 'protocol')
-  gdc$bio.admin     <- GDCprepare_clinic(query$biospecimen, clinical.info = 'admin')
-  gdc$bio.aliquot   <- GDCprepare_clinic(query$biospecimen, clinical.info = 'aliquot')
-  gdc$bio.analyte   <- GDCprepare_clinic(query$biospecimen, clinical.info = 'analyte')
-  gdc$bio.patient   <- GDCprepare_clinic(query$biospecimen, clinical.info = 'bio_patient')
-  gdc$bio.sample    <- GDCprepare_clinic(query$biospecimen, clinical.info = 'sample')
-  gdc$bio.portion   <- GDCprepare_clinic(query$biospecimen, clinical.info = 'portion')
-  gdc$bio.slide     <- GDCprepare_clinic(query$biospecimen, clinical.info = 'slide')
-  #
-
-  # only pre-processing needed for bio.sample
-  rownames(gdc$bio.sample) <- gdc$bio.sample$bcr_sample_barcode
+  gdc$bio.protocol  <- 'There was a problem downloading from GDC, not available'
+  gdc$bio.admin     <- 'There was a problem downloading from GDC, not available'
+  gdc$bio.aliquot   <- 'There was a problem downloading from GDC, not available'
+  gdc$bio.analyte   <- 'There was a problem downloading from GDC, not available'
+  gdc$bio.patient   <- 'There was a problem downloading from GDC, not available'
+  gdc$bio.sample    <- 'There was a problem downloading from GDC, not available'
+  gdc$bio.portion   <- 'There was a problem downloading from GDC, not available'
+  gdc$bio.slide     <- 'There was a problem downloading from GDC, not available'
+  tryCatch({
+    gdc$bio.protocol  <- GDCprepare_clinic(query$biospecimen, clinical.info = 'protocol')
+    gdc$bio.admin     <- GDCprepare_clinic(query$biospecimen, clinical.info = 'admin')
+    gdc$bio.aliquot   <- GDCprepare_clinic(query$biospecimen, clinical.info = 'aliquot')
+    gdc$bio.analyte   <- GDCprepare_clinic(query$biospecimen, clinical.info = 'analyte')
+    gdc$bio.patient   <- GDCprepare_clinic(query$biospecimen, clinical.info = 'bio_patient')
+    gdc$bio.sample    <- GDCprepare_clinic(query$biospecimen, clinical.info = 'sample')
+    gdc$bio.portion   <- GDCprepare_clinic(query$biospecimen, clinical.info = 'portion')
+    gdc$bio.slide     <- GDCprepare_clinic(query$biospecimen, clinical.info = 'slide')
+    #
+  
+    # only pre-processing needed for bio.sample
+    rownames(gdc$bio.sample) <- gdc$bio.sample$bcr_sample_barcode
+  }, error = function(err) {
+    flog.warn('Error preparing biosample data, %s', err)
+  })
   
   flog.info('Preparing query for RNASeq FPKM data...')
   query$rnaseq.fpkm <- GDCquery(project = project,
@@ -219,25 +231,6 @@ devtools::load_all()
 Pattern to retrieve TCGA patient and sample type from extended barcode.
 
 ```{r all_data_set}
-# $1 gets the TCGA participant portion
-# $2 gets the sample type
-tcga.barcode.pattern <- '(TCGA-[A-Z0-9a-z]{2}-[a-zA-Z0-9]{4})-([0-9]{2}).+'
-#
-# patient barcode for each column in tcga.data$dat
-fpkm.per.tissue.barcode <- getParticipantCode(gdc$rnaseq.fpkm@colData$barcode)
-#
-# getting all tisues
-fpkm.per.tissue           <- as.matrix(gdc$rnaseq.fpkm@assays$data[["HTSeq - FPKM"]])
-colnames(fpkm.per.tissue) <- gdc$rnaseq.fpkm@colData$barcode
-rownames(fpkm.per.tissue) <- gdc$rnaseq.fpkm@rowRanges$ensembl_gene_id
-
-# Counts
-counts.per.tissue           <- as.matrix(gdc$rnaseq.counts@assays$data[["HTSeq - Counts"]])
-colnames(counts.per.tissue) <- gdc$rnaseq.counts@colData$barcode
-rownames(counts.per.tissue) <- gdc$rnaseq.counts@rowRanges$ensembl_gene_id
-
-#
-gene.ranges <- gdc$rnaseq.fpkm@rowRanges
 #
 # clinical data
 rownames(gdc$clinical) <- gdc$clinical$bcr_patient_barcode
@@ -326,9 +319,8 @@ Builds a multiAssayExperiment with clinical, rnaseq and mutation count data
 ```{r}
 multiAssay <- build.assay(clinical.custom      = clinical, 
                           gdc.custom           = gdc, 
-                          mutation.custom      = mutation$count,
-                          rnaseq.fpkm.custom   = fpkm.per.tissue,
-                          rnaseq.counts.custom = counts.per.tissue)
+                          mutation.custom      = mutation$count)
+multiAssay
 ```
 
 

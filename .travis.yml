@@ -14,14 +14,14 @@ r:
 warnings_are_errors: false
 env: _R_CHECK_CRAN_INCOMING_=FALSE
 
-#deploy:
-  #provider: releases
-  #skip_cleanup: true
-  #overwrite: true
-  #api_key:
-    #secure: KW4/vrIHzP8hs76Qo7Hmw1nraVb/PFE3zr/Cm8hG2Z+nAWAXtvi4gtNv+vk29l9oJvwAowpggXbUwyg8m/q8MTVxafdA907UFZlKSM3bPRKWouQy58Yb0x4jJInbGypcxJmY4fVCg9yLvXzlIJQrMafYMNFQen8qFHwUXiZCKas4cBmGryonhup+FZetAXu66lYkCoFEhQIRDtn7Oe08AGW6vHK+JYgDy/voSzNnf7iJQoLk/dRqUC1gqbUACfwn8S31WLMPJtyxOPaX7nKo2mEcK1lC1DCSI2VL7dL9tGx8GkIOWX9rKjXYUiqNIY4SFqhXEkUWZmv6tacMN9FgzZ9gNIPeMUtLydjlGrTdX9GNUNuu2wILAzzOU4IzN/6X7XIRqVEowmK7wTeNVSanu1XfgRNVO28SRg66j2YGIgA19/uSSYliKacVIlrE6FqZ1QRX3763JkFwEwm6kZO20q5xwY4bKW1gNF47SIBpZPgKEWdiJ0SfRCMOrfXiTXAVtDxEmrx3sXAL1WFzjTxwASF5TXLS6zVmAiGAcoO+qn+2rjQCtNmnMglPZ3W4ae6sS3ZAOSdEFk5mW3fkg2ssUyG4UL1BE7yFYU2GiCnHSTTYFRu0s3B8g/F1AOTXPiiiZfj0QUf5y0WwPKwyW0M21mc8U5Sem02JeVXISdhkDoY=
-  #file_glob: true
-  #file: "*.data.tar.gz"
-  #on:
-    #tags: true
-    #condition: "$TRAVIS_OS_NAME = linux && $TRAVIS_R_VERSION_STRING = 'bioc-release'"
+deploy:
+  provider: releases
+  skip_cleanup: true
+  overwrite: true
+  api_key:
+    secure: KW4/vrIHzP8hs76Qo7Hmw1nraVb/PFE3zr/Cm8hG2Z+nAWAXtvi4gtNv+vk29l9oJvwAowpggXbUwyg8m/q8MTVxafdA907UFZlKSM3bPRKWouQy58Yb0x4jJInbGypcxJmY4fVCg9yLvXzlIJQrMafYMNFQen8qFHwUXiZCKas4cBmGryonhup+FZetAXu66lYkCoFEhQIRDtn7Oe08AGW6vHK+JYgDy/voSzNnf7iJQoLk/dRqUC1gqbUACfwn8S31WLMPJtyxOPaX7nKo2mEcK1lC1DCSI2VL7dL9tGx8GkIOWX9rKjXYUiqNIY4SFqhXEkUWZmv6tacMN9FgzZ9gNIPeMUtLydjlGrTdX9GNUNuu2wILAzzOU4IzN/6X7XIRqVEowmK7wTeNVSanu1XfgRNVO28SRg66j2YGIgA19/uSSYliKacVIlrE6FqZ1QRX3763JkFwEwm6kZO20q5xwY4bKW1gNF47SIBpZPgKEWdiJ0SfRCMOrfXiTXAVtDxEmrx3sXAL1WFzjTxwASF5TXLS6zVmAiGAcoO+qn+2rjQCtNmnMglPZ3W4ae6sS3ZAOSdEFk5mW3fkg2ssUyG4UL1BE7yFYU2GiCnHSTTYFRu0s3B8g/F1AOTXPiiiZfj0QUf5y0WwPKwyW0M21mc8U5Sem02JeVXISdhkDoY=
+  file_glob: true
+  file: "*.data.tar.gz"
+  on:
+    tags: true
+    condition: "$TRAVIS_OS_NAME = linux && $TRAVIS_R_VERSION_STRING = 'bioc-release'"
