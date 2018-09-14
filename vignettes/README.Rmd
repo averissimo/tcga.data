@@ -57,12 +57,10 @@ fpkm.clinical   <- fpkm.data$clinical
 BiocManager::install('https://github.com/averissimo/tcga.data/releases/download/2016.12.15-brca/brca.data_1.0.tar.gz')
 #
 # Load the brca.data package
-library(brca.data)
+library(brca.data.2018.09.13)
 # start using the data, for example the tissue data
-data(fpkm.per.tissue)
-# tissue is now in the enviromnet and will be loaded on the first
-#  time it is used. For example:
-names(fpkm.per.tissue)
+data(multiAssay)
+multiAssay
 ```
 
 ## How to build own data package

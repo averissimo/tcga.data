@@ -41,7 +41,7 @@ fpkm.data <- build.matrix('RNASeqFPKM', multiAssay)
 fpkm.per.tissue <- fpkm.data$data
 
 # simple transpose
-rna.seq <- t(fpkm.per.tissue$primary.tumor)
+rna.seq <- t(fpkm.per.tissue$primary.solid.tumor)
 
 # find index with sd == 0 and remove them
 rna.seq.sd <- sapply(seq(ncol(rna.seq)), function(e){
