@@ -23,6 +23,7 @@ knitr::opts_chunk$set(echo = TRUE)
 devtools::load_all()
 library(ggplot2)
 library(reshape2)
+library(dplyr)
 library(futile.logger)
 ```
 
@@ -34,7 +35,10 @@ library(futile.logger)
 
 ```{r data}
 # data
-data("fpkm.per.tissue")
+data("multiAssay")
+
+fpkm.data <- build.matrix('RNASeqFPKM', multiAssay)
+fpkm.per.tissue <- fpkm.data$data
 
 # simple transpose
 rna.seq <- t(fpkm.per.tissue$primary.solid.tumor)
@@ -79,7 +83,10 @@ for (my.name in colnames(rna.seq)) {
   #
   binwidth <- sd(my.rna.seq) / 30
   g <- ggplot(data = rna.seq.df) + theme_minimal() +
-    geom_freqpoly(aes(value, color = variable), binwidth = binwidth)+ facet_grid(variable ~ .) + 
+    #geom_freqpoly(aes(value, color = variable), binwidth = binwidth) +
+    stat_density(aes(value, fill = variable, color = variable), alpha = .3, adjust = 1/5) + 
+    facet_wrap(variable ~ ., scales = 'free', ncol = 1) + 
+    theme(legend.position = 'none') +
     ggtitle(sprintf('Distribution of %s', my.name))
   #
   flog.info('Summary of original value', summary(my.rna.seq.df$value), capture = T)

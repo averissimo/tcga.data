@@ -1,18 +1,23 @@
-Package: prad.data
+Package: prad.data.2018.10.11
 Title: Gene expression and clinical data from Prostate cancer dataset from TCGA.
-Version: 2017.07.21
+Version: 1.0
 Authors@R: person("André", "Veríssimo", email = "andre.verissimo@tecnico.ulisboa.pt", role = c("aut", "cre"))
-Description: Contains the datasets for PRAD (prostate cancer) with gene expression
-    and clinical data. All was extracted from TCGA.
+Description: Contains the datasets for PRAD (Prostate) with gene expression, mutation
+             and clinical data. All was extracted from TCGA.
+             Data was downloaded in 2018.10.11 and processed using build_data.Rmd vignette
 Depends:
     R (>= 3.3.2)
 License: GPL-3
+Imports: Biobase,
+    SingleCellExperiment,
+    MultiAssayExperiment
 Encoding: UTF-8
 LazyData: true
 Suggests:
     futile.logger,
     TCGAbiolinks,
     knitr,
-    rmarkdown
-RoxygenNote: 6.0.1
+    rmarkdown,
+    dplyr
+RoxygenNote: 6.1.0
 VignetteBuilder: knitr
