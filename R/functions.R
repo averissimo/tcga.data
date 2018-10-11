@@ -35,7 +35,7 @@ build.matrix <- function(source.name, assay.data) {
   cli.list  <- list()
   full.code <- list()
   
-  if (source.name %in% names(assay.data)) {
+  if (source.name %in% names(assay.data@ExperimentList)) {
     if (source.name == 'Mutation') {
       return(assay.data[[source.name]]@assays[['counts']])
     } else if (source.name %in% c('RNASeqFPKM', 'RNASeqCounts')) {
