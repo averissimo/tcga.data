@@ -250,7 +250,7 @@ follow.up              <- gdc$follow.up
 levels(clinical$vital_status) <- levels(clinical$vital_status) %>% {replace(., . == '', NA)}
 levels(follow.up$vital_status)    <- levels(follow.up$vital_status) %>% {replace(., . == '', NA)}
 
-updated.surv           <- update.survival.from.followup(clinical, follow.up) %>% as.data.frame
+updated.surv           <- updateSurvivalFromFollowup(clinical, follow.up) %>% as.data.frame
 rownames(updated.surv) <- updated.surv$bcr_patient_barcode
 
 clinical$surv_event_time <- updated.surv[clinical$bcr_patient_barcode, 'surv_event_time']
