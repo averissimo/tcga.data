@@ -10,14 +10,14 @@ Depends:
 License: GPL-3
 Imports: Biobase,
     SingleCellExperiment,
-    MultiAssayExperiment
+    MultiAssayExperiment,
+    dplyr,
+    futile.logger,
+    TCGAutils
 Encoding: UTF-8
 LazyData: true
-Suggests:
-    futile.logger,
-    TCGAbiolinks,
+Suggests: TCGAbiolinks,
     knitr,
-    rmarkdown,
-    dplyr
+    rmarkdown
 RoxygenNote: 6.1.0
 VignetteBuilder: knitr
