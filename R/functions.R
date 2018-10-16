@@ -11,8 +11,7 @@
 #' getParticipantCode('TCGA-3C-AAAU-01A-11R-A41B-07')
 #' getParticipantCode(c('TCGA-3C-AAAU-01A-11R-A41B-07', 'TCGA-3C-AALI-01A-11R-A41B-07'))
 getParticipantCode <- function(fullBarcode) {
-  tcga.barcode.pattern <- '(TCGA-[A-Z0-9a-z]{2}-[a-zA-Z0-9]{4}).*'
-  return(gsub(tcga.barcode.pattern, '\\1', fullBarcode))
+  return(TCGAutils::TCGAbarcode(fullBarcode))
 }
 
 #' Build list of matrices with different types of tissues
@@ -55,10 +54,12 @@ build.matrix <- function(source.name, assay.data) {
         colnames(ret.list[[sample.id]]) <- strtrim(colnames(ret.list[[sample.id]]), 12)
       }
       
-      flog.info('Individuals per sample type for %s', source.name)
+      futile.logger::flog.info('Individuals per sample type for %s', source.name)
       for (ix.name in names(ret.list)) {
-        flog.info('  * %s: %d', ix.name, ncol(ret.list[[ix.name]]))
+        futile.logger::flog.info('  * %s: %d', ix.name, ncol(ret.list[[ix.name]]))
       }
+      
+      cli.list$all <- new.assay@colData
       return(list(clinical = cli.list, data = ret.list, original.codes = full.code))
     } else {
       stop('Source must be one of the assays in multiAssay data object')  

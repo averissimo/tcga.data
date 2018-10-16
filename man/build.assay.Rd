@@ -4,8 +4,7 @@
 \alias{build.assay}
 \title{Create MultiAssayExperiment object from data}
 \usage{
-build.assay(clinical.custom, gdc.custom, mutation.custom,
-  rnaseq.fpkm.custom, rnaseq.counts.custom)
+build.assay(clinical.custom, gdc.custom, mutation.custom)
 }
 \arguments{
 \item{clinical}{use custom clinical (that can be pre-processed)}

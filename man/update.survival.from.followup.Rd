@@ -4,7 +4,7 @@
 \alias{update.survival.from.followup}
 \title{Update clinical data from follow-up table}
 \usage{
-update.survival.from.followup(clinical, follow.up)
+\method{update}{survival.from.followup}(clinical, follow.up)
 }
 \arguments{
 \item{clinical}{data.frame with clinical information from TCGA project}
