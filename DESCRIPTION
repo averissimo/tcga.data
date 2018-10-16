@@ -1,22 +1,24 @@
 Package: skcm.data.2018.09.11
 Title: Gene expression and clinical data from Skin Melanoma from TCGA.
-Version: 2018.09.11
+Version: 1.1
 Authors@R: person("André", "Veríssimo", email = "andre.verissimo@tecnico.ulisboa.pt", role = c("aut", "cre"))
 Description: Contains the datasets for SKCM (Skin) with gene expression, mutation
              and clinical data. All was extracted from TCGA.
-             Data was downloaded in 2018.09.11 and processed using build_data.Rmd vignette
-Depends:
-    R (>= 3.3.2)
+             Data was downloaded in 2018.09.13 and processed using build_data.Rmd vignette
+Depends: R (>= 3.3.2),
+    tcga.data.utils
 License: GPL-3
 Imports: Biobase,
     SingleCellExperiment,
-    MultiAssayExperiment
+    MultiAssayExperiment,
+    dplyr,
+    futile.logger,
+    TCGAutils
 Encoding: UTF-8
 LazyData: true
-Suggests:
-    futile.logger,
-    TCGAbiolinks,
+Suggests: TCGAbiolinks,
     knitr,
     rmarkdown
+Remotes: averissimo/tcga.data.utils,
 RoxygenNote: 6.1.0
 VignetteBuilder: knitr
