@@ -13,11 +13,13 @@ Imports: Biobase,
     MultiAssayExperiment,
     dplyr,
     futile.logger,
-    TCGAutils
+    TCGAutils,
+    tcga.data.utils
 Encoding: UTF-8
 LazyData: true
 Suggests: TCGAbiolinks,
     knitr,
     rmarkdown
+Remotes: averissimo/tcga.data.utils,
 RoxygenNote: 6.1.0
 VignetteBuilder: knitr
