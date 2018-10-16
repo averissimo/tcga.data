@@ -5,8 +5,8 @@ Authors@R: person("André", "Veríssimo", email = "andre.verissimo@tecnico.ulisb
 Description: Contains the datasets for PRAD (Prostate) with gene expression, mutation
              and clinical data. All was extracted from TCGA.
              Data was downloaded in 2018.10.11 and processed using build_data.Rmd vignette
-Depends:
-    R (>= 3.3.2)
+Depends: R (>= 3.3.2),
+    tcga.data.utils
 License: GPL-3
 Imports: Biobase,
     SingleCellExperiment,
@@ -19,5 +19,6 @@ LazyData: true
 Suggests: TCGAbiolinks,
     knitr,
     rmarkdown
+Remotes: averissimo/tcga.data.utils,
 RoxygenNote: 6.1.0
 VignetteBuilder: knitr
