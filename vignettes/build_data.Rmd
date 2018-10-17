@@ -280,7 +280,7 @@ mutation.bcrcodes <- mutation$data$Tumor_Sample_Barcode %>%
   getParticipantCode %>% unique %>% sort
 
 mutation$count <- matrix(integer(1), 
-                         ncol     = nrow(gdc$clinical), 
+                         ncol     = length(mutation.bcrcodes), 
                          nrow     = length(unique(mutation$data$Gene)), 
                          dimnames = list(unique(mutation$data$Gene), 
                                          mutation.bcrcodes))
