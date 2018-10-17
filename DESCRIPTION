@@ -1,18 +1,24 @@
-Package: kirc.data
-Title: Gene expression and clinical data from Breast cancer dataset from TCGA.
-Version: 1.0
+Package: kirc.data.2018.10.17
+Title: Gene expression and clinical data from Kidney cancer dataset from TCGA.
+Version: 1.1
 Authors@R: person("André", "Veríssimo", email = "andre.verissimo@tecnico.ulisboa.pt", role = c("aut", "cre"))
-Description: Contains the datasets for BRCA (breast cancer) with gene expression
-    and clinical data. All was extracted from TCGA.
-Depends:
-    R (>= 3.3.2)
+Description: Contains the datasets for KIRC (Kidney) with gene expression, mutation
+             and clinical data. All was extracted from TCGA.
+             Data was downloaded in 2018.10.17 and processed using build_data.Rmd vignette
+Depends: R (>= 3.3.2),
+    tcga.data.utils
 License: GPL-3
+Imports: Biobase,
+    SingleCellExperiment,
+    MultiAssayExperiment,
+    dplyr,
+    futile.logger,
+    TCGAutils
 Encoding: UTF-8
 LazyData: true
-Suggests:
-    futile.logger,
-    TCGAbiolinks,
+Suggests: TCGAbiolinks,
     knitr,
     rmarkdown
-RoxygenNote: 6.0.1
+Remotes: averissimo/tcga.data.utils,
+RoxygenNote: 6.1.0
 VignetteBuilder: knitr

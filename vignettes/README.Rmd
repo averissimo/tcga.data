@@ -2,7 +2,13 @@
 title: "TCGA.DATA R Package"
 output:
   github_document:
-    toc: true
+    toc: yes
+  rmarkdown::html_vignette:
+    toc: yes
+vignette: >
+  %\VignetteIndexEntry{Vignette Title}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r setup, include=FALSE}
@@ -29,27 +35,32 @@ The genome expression datasets are already in a matrix format ready to be used. 
 1. Load the library
 
 1. Load the required datasets (one or more of the following)
-    - `clinical`
-    - `fpkm.per.tissue`
-    - `fpkm.per.tissue.barcode`
-    - `mutation`
-    - `gdc`
+    - `multiAssay`
+    - `gdc.original`
 
-#### Example
+In older versions of this package, prior to September 2018, the dataset was named `fpkm.per.tissue` or `mutation`, but we since improved the storage using a MultiAssayExperiment object from bioconductor.
+
+To recover the datasets in the old matrix format use the following 
+
+```{r, eval=FALSE}
+data('multiAssay')
+fpkm.data <- build.matrix('RNASeqFPKM', multiAssay)
+fpkm.per.tissue <- fpkm.data$data
+fpkm.clinical   <- fpkm.data$clinical
+```
+
+
+#### Example for BRCA package
 
 ```{r install_brca.data, eval=FALSE}
-# install the devtooks library
-install.packages('devtools')
 # The library can also be loaded and use the function install_git without 'devtools::' prefix
-devtools::install_url('https://github.com/averissimo/tcga.data/releases/download/2016.12.15-brca/brca.data_1.0.tar.gz')
+BiocManager::install('https://github.com/averissimo/tcga.data/releases/download/2016.12.15-brca/brca.data_1.0.tar.gz')
 #
 # Load the brca.data package
-library(brca.data)
+library(brca.data.2018.09.13)
 # start using the data, for example the tissue data
-data(fpkm.per.tissue)
-# tissue is now in the enviromnet and will be loaded on the first
-#  time it is used. For example:
-names(fpkm.per.tissue)
+data(multiAssay)
+multiAssay
 ```
 
 ## How to build own data package
@@ -60,12 +71,11 @@ names(fpkm.per.tissue)
   * we use a convention of ####.data where #### is the tcga project name in lowercase
 1. Run the vignettes/build_data.Rmd to build the cache of the data
 1. Run `devtools::document()` to create documentation
-1. (Optional step) Run `devtools::build_vignettes()` to build additional documentation
 1. Run `devtools::build()` to build the actual package
 
 ## Ackowledgements
 
-This package was developed primarily by *[André Veríssimo](http://web.tecnico.ulisboa.pt/andre.verissimo/)* with support from *Marta Lopes* and *[Susana Vinga](http://web.tecnico.ulisboa.pt/susanavinga/)*
+This package was developed primarily by *[André Veríssimo](http://web.tecnico.ulisboa.pt/andre.verissimo/)* with support from *Marta Lopes*, *Eunice Carrasquinha* and *[Susana Vinga](http://web.tecnico.ulisboa.pt/susanavinga/)*
 
 This work was supported by:
 

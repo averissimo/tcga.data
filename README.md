@@ -22,19 +22,25 @@ Package information
 2.  Load the library
 
 3.  Load the required datasets (one or more of the following)
-    -   `clinical`
-    -   `fpkm.per.tissue`
-    -   `fpkm.per.tissue.barcode`
-    -   `mutation`
-    -   `gdc`
+    -   `multiAssay`
+    -   `gdc.original`
 
-#### Example
+In older versions of this package, prior to September 2018, the dataset was named `fpkm.per.tissue` or `mutation`, but we since improved the storage using a MultiAssayExperiment object from bioconductor.
+
+To recover the datasets in the old matrix format use the following
 
 ``` r
-# install the devtooks library
-install.packages('devtools')
+data('multiAssay')
+fpkm.data <- build.matrix('RNASeqFPKM', multiAssay)
+fpkm.per.tissue <- fpkm.data$data
+fpkm.clinical   <- fpkm.data$clinical
+```
+
+#### Example for BRCA package
+
+``` r
 # The library can also be loaded and use the function install_git without 'devtools::' prefix
-devtools::install_url('https://github.com/averissimo/tcga.data/releases/download/2016.12.15-brca/brca.data_1.0.tar.gz')
+BiocManager::install('https://github.com/averissimo/tcga.data/releases/download/2016.12.15-brca/brca.data_1.0.tar.gz')
 #
 # Load the brca.data package
 library(brca.data)
@@ -56,13 +62,17 @@ How to build own data package
 
 1.  Run the vignettes/build\_data.Rmd to build the cache of the data
 2.  Run `devtools::document()` to create documentation
+<<<<<<< HEAD
 3.  (Optional step) Run `devtools::build_vignettes()` to build additional documentation
 4.  Run `devtools::build()` to build the actual package
+=======
+3.  Run `devtools::build()` to build the actual package
+>>>>>>> master
 
 Ackowledgements
 ---------------
 
-This package was developed primarily by *[André Veríssimo](http://web.tecnico.ulisboa.pt/andre.verissimo/)* with support from *Marta Lopes* and *[Susana Vinga](http://web.tecnico.ulisboa.pt/susanavinga/)*
+This package was developed primarily by *[André Veríssimo](http://web.tecnico.ulisboa.pt/andre.verissimo/)* with support from *Marta Lopes*, *Eunice Carrasquinha* and *[Susana Vinga](http://web.tecnico.ulisboa.pt/susanavinga/)*
 
 This work was supported by:
 
