@@ -276,8 +276,14 @@ mutation$dups <- dplyr::arrange(mutation$dups, Hugo_Symbol, Tumor_Sample_Barcode
 #### Recalculate Mutations count of (row: gene) x (col: case)
 
 ```{r calc_mutations_count}
-mutation$count <- matrix(integer(1), ncol = nrow(gdc$clinical), nrow = length(unique(mutation$data$Gene)), 
-                         dimnames = list(unique(mutation$data$Gene), gdc$clinical$bcr_patient_barcode))
+mutation.bcrcodes <- mutation$data$Tumor_Sample_Barcode %>%
+  getParticipantCode %>% unique %>% sort
+
+mutation$count <- matrix(integer(1), 
+                         ncol     = nrow(gdc$clinical), 
+                         nrow     = length(unique(mutation$data$Gene)), 
+                         dimnames = list(unique(mutation$data$Gene), 
+                                         mutation.bcrcodes))
 # get a temporary index list for fast access
 ix.list <- cbind(mutation$data$Gene, getParticipantCode(mutation$data$Tumor_Sample_Barcode))
 ix.list <- ix.list[!is.na(mutation$data$Gene),]
@@ -286,7 +292,7 @@ colnames(ix.list) <- c('gene', 'patient')
 # this is a long run, should be as simple as possible
 sum.list <- ix.list %>% group_by(gene, patient) %>% summarise(n = n())
 for(ix in seq(nrow(sum.list))) {
-  mutation$count[sum.list[[ix,'gene']], sum.list[[ix,'patient']]] <- sum.list[[ix,'n']]
+  mutation$count[sum.list[[ix, 'gene']], sum.list[[ix, 'patient']]] <- sum.list[[ix,'n']]
 }
 mutation$count <- Matrix::Matrix(mutation$count, sparse = TRUE)
 ```
