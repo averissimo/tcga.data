@@ -1,10 +1,10 @@
-Package: brca.data.2018.09.13
-Title: Gene expression and clinical data from Breast invasive carcinoma from TCGA.
+Package: ucec.data.2018.10.17
+Title: Gene expression and clinical data from Uterine Corpus Endometrial Carcinoma from TCGA.
 Version: 1.1
 Authors@R: person("André", "Veríssimo", email = "andre.verissimo@tecnico.ulisboa.pt", role = c("aut", "cre"))
-Description: Contains the datasets for BRCA (Breast) with gene expression, mutation
+Description: Contains the datasets for UCEC (Uterine) with gene expression, mutation
              and clinical data. All was extracted from TCGA.
-             Data was downloaded in 2018.09.13 and processed using build_data.Rmd vignette
+             Data was downloaded in 2018.10.17 and processed using build_data.Rmd vignette
 Depends: R (>= 3.3.2),
     tcga.data.utils
 License: GPL-3
