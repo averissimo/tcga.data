@@ -1,4 +1,4 @@
-Package: lgg.data.2018.09.13
+Package: lgg.data.2018.10.17
 Title: Gene expression and clinical data from Brain Lower Grade Glioma from TCGA.
 Version: 1.1
 Authors@R: person("André", "Veríssimo", email = "andre.verissimo@tecnico.ulisboa.pt", role = c("aut", "cre"))
