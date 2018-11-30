@@ -20,5 +20,5 @@ Suggests: TCGAbiolinks,
     knitr,
     rmarkdown
 Remotes: averissimo/tcga.data.utils,
-RoxygenNote: 6.1.0
+RoxygenNote: 6.1.1
 VignetteBuilder: knitr
