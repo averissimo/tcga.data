@@ -11,7 +11,7 @@ vignette: >
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 params:
-  project: "TCGA-LGG"
+  project: "TCGA-OV"
 ---
 
 ```{r setup, include=FALSE}
@@ -144,7 +144,7 @@ if (file.exists(cached.file)) {
 
   #
   flog.info('Download biospecimen data...')
-  GDCdownload(query$biospecimen, method = 'api')
+  GDCdownload(query$biospecimen, method = 'api', files.per.chunk = 100)
   #
   flog.info('Organizing biospecimen data...')
   gdc$bio.protocol  <- 'There was a problem downloading from GDC, not available'
@@ -234,6 +234,20 @@ Pattern to retrieve TCGA patient and sample type from extended barcode.
 ```{r all_data_set}
 #
 # clinical data
+if (any(duplicated(gdc$clinical$bcr_patient_barcode))) {
+  dup.barcodes <- gdc$clinical$bcr_patient_barcode %>% { .[duplicated(.) %>% which] }
+  .Last.value <- sapply(dup.barcodes, function(ix) { 
+    sub.table <- filter(gdc$clinical, bcr_patient_barcode == ix) 
+    should.break <- apply(sub.table, 2, function(ix.col) { table(ix.col) }) %>%
+      sapply(function(ix.res) { length(ix.res) %in% c(0,1)}) %>%
+      all
+    if (!should.break) {
+      stop('There are non-equal rows with same bcr_patient_barcode')
+    }
+  })
+  gdc$clinical <- gdc$clinical[!duplicated(gdc$clinical$bcr_patient_barcode),]
+}
+
 rownames(gdc$clinical) <- gdc$clinical$bcr_patient_barcode
 gdc$clinical           <- gdc$clinical
 clinical               <- gdc$clinical
